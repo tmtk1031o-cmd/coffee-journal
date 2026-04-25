@@ -1,0 +1,2046 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coffee Journal</title>
+<style>
+:root {
+  --bg:     #eae7e2;
+  --panel:  #f5f3f0;
+  --card:   #ffffff;
+  --s3:     #f0ece7;
+  --border: #d8d0c6;
+  --b2:     #b8aca0;
+  --brown:  #4e2f14;
+  --br2:    #7c5030;
+  --br3:    #b08050;
+  --br4:    #d4b080;
+  --text:   #1c1410;
+  --t2:     #5a4838;
+  --t3:     #8a7868;
+  --t4:     #b0a090;
+  --red:    #b83040;
+  --green:  #2a7040;
+  --shadow: 0 1px 4px rgba(80,50,20,.08);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Georgia',serif;background:var(--bg);color:var(--text);min-height:100vh;overflow:hidden}
+
+/* ── HEADER ── */
+header{
+  height:58px;
+  background:var(--brown);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;flex-shrink:0;
+}
+.hd-brand{display:flex;align-items:center;gap:12px}
+.hd-icon{font-size:24px}
+.hd-title{font-size:18px;color:#f0e8d8;letter-spacing:2px;font-weight:normal}
+.hd-sub{font-size:11px;color:var(--br3);margin-top:2px;font-family:sans-serif}
+.hd-stats{display:flex;gap:20px;font-family:sans-serif;font-size:12px;color:var(--br3)}
+.hd-stats span{display:flex;align-items:center;gap:4px}
+.hd-stats strong{color:var(--br4)}
+
+/* ── TOOLBAR ── */
+.toolbar{
+  height:46px;background:var(--card);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:6px;
+  padding:0 14px;flex-shrink:0;overflow-x:auto;
+}
+.toolbar::-webkit-scrollbar{display:none}
+
+.sw{position:relative;flex-shrink:0}
+.sw input{
+  width:210px;height:30px;
+  background:var(--s3);border:1px solid var(--border);border-radius:15px;
+  color:var(--text);font-size:12px;font-family:sans-serif;
+  padding:0 12px 0 30px;outline:none;transition:border-color .2s;
+}
+.sw input:focus{border-color:var(--br2)}
+.sw input::placeholder{color:var(--t4)}
+.si{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none;color:var(--t3)}
+
+.sep{width:1px;height:22px;background:var(--border);flex-shrink:0;margin:0 4px}
+
+.tb-btn{
+  height:28px;padding:0 11px;border-radius:14px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--t3);font-size:11px;cursor:pointer;font-family:sans-serif;
+  white-space:nowrap;flex-shrink:0;transition:all .15s;
+}
+.tb-btn:hover{background:var(--s3);color:var(--t2)}
+.tb-btn.on{background:var(--brown);color:#f0e8d8;border-color:var(--brown)}
+
+.sort-sel{
+  height:28px;padding:0 10px;border-radius:14px;
+  background:var(--s3);border:1px solid var(--border);
+  color:var(--t3);font-size:11px;cursor:pointer;font-family:sans-serif;outline:none;flex-shrink:0;
+}
+
+/* ── LAYOUT ── */
+.main{display:flex;height:calc(100vh - 104px)}
+
+/* ── LIST PANEL ── */
+.list-panel{
+  width:268px;min-width:268px;
+  background:var(--panel);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.list-count{
+  padding:5px 14px;font-size:10px;color:var(--t4);
+  font-family:sans-serif;border-bottom:1px solid var(--border);
+  flex-shrink:0;background:var(--card);
+}
+.list-scroll{flex:1;overflow-y:auto}
+
+.card{
+  padding:11px 13px;border-bottom:1px solid var(--border);
+  cursor:pointer;transition:background .12s;background:var(--card);
+  position:relative;
+}
+.card:hover{background:var(--s3)}
+.card.active{background:#f0e8d8;border-left:2px solid var(--brown)}
+
+.card-row1{display:flex;align-items:center;gap:6px;margin-bottom:2px}
+.card-flag{font-size:15px;line-height:1;flex-shrink:0}
+.card-name{font-size:13px;color:var(--brown);flex:1;font-weight:normal}
+.card-fav{
+  background:none;border:none;font-size:13px;cursor:pointer;
+  opacity:.2;transition:opacity .15s,transform .12s;padding:0;line-height:1;flex-shrink:0;
+}
+.card-fav.on{opacity:1}
+.card-fav:hover{transform:scale(1.2)}
+
+.card-region{font-size:10px;color:var(--t4);font-family:sans-serif;margin-bottom:5px}
+.card-stars{font-size:11px;color:var(--border);margin-bottom:5px;letter-spacing:1px}
+.card-stars.rated{color:var(--br3)}
+.card-tags{display:flex;flex-wrap:wrap;gap:3px}
+.ctag{
+  padding:1px 7px;border-radius:9px;font-size:10px;font-family:sans-serif;
+  background:var(--s3);color:var(--t3);border:1px solid var(--border);
+}
+.ctag.note{background:#e8f5ec;color:var(--green);border-color:#c0e0c8}
+.ctag.fav{background:#fce8ea;color:var(--red);border-color:#f0c8cc}
+
+/* ── DETAIL PANEL ── */
+.detail-panel{flex:1;overflow-y:auto;background:var(--bg)}
+.placeholder{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:10px;
+}
+.ph-icon{font-size:52px;opacity:.12}
+.ph-text{font-size:15px;color:var(--t3)}
+.ph-sub{font-size:12px;color:var(--t4);font-family:sans-serif;opacity:.7}
+
+/* ── DETAIL CONTENT ── */
+.dc{max-width:780px;padding:24px 30px 48px}
+
+/* header block */
+.dh{
+  background:var(--card);border-radius:12px;
+  border:1px solid var(--border);box-shadow:var(--shadow);
+  padding:22px 24px;margin-bottom:16px;
+  display:flex;align-items:flex-start;justify-content:space-between;
+}
+.dh-left{}
+.dh-flag{font-size:36px;margin-bottom:8px;line-height:1}
+.dh-name{font-size:26px;color:var(--brown);margin-bottom:2px}
+.dh-en{font-size:11px;color:var(--t4);font-family:sans-serif;margin-bottom:5px}
+.cont-badge{
+  display:inline-block;padding:2px 10px;border-radius:10px;
+  font-size:10px;font-family:sans-serif;margin-bottom:8px;
+  background:var(--s3);color:var(--t2);border:1px solid var(--border);
+}
+.dh-region{font-size:11px;color:var(--t3);font-family:sans-serif;margin-bottom:10px}
+.dh-flavors{display:flex;flex-wrap:wrap;gap:5px}
+.ftag{
+  padding:3px 11px;border-radius:14px;font-size:11px;font-family:sans-serif;
+  background:var(--s3);border:1px solid var(--border);color:var(--t2);
+}
+
+.dh-right{display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0;margin-left:16px}
+.fav-lg{
+  width:40px;height:40px;border-radius:50%;
+  background:var(--s3);border:1px solid var(--border);
+  font-size:18px;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;
+}
+.fav-lg:hover{background:#fce8ea;border-color:#f0c8cc;transform:scale(1.08)}
+.fav-lg.on{border-color:var(--red);background:#fce8ea}
+.my-rate-label{font-size:9px;color:var(--t4);font-family:sans-serif;text-align:center;margin-bottom:3px}
+.stars-in{display:flex;gap:1px}
+.star-btn{
+  background:none;border:none;font-size:20px;cursor:pointer;
+  color:var(--border);transition:color .1s,transform .08s;padding:1px;
+}
+.star-btn.lit{color:var(--br3)}
+.star-btn:hover{transform:scale(1.15)}
+
+/* section blocks */
+.sec{
+  background:var(--card);border-radius:10px;
+  border:1px solid var(--border);box-shadow:var(--shadow);
+  padding:18px 22px;margin-bottom:12px;
+}
+.sec-title{
+  font-size:10px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;
+  font-family:sans-serif;margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* profile wrap */
+.profile-wrap{display:flex;gap:18px;align-items:flex-start}
+.radar-wrap{flex-shrink:0}
+.radar-wrap svg{display:block}
+.info-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ig{background:var(--s3);border:1px solid var(--border);border-radius:7px;padding:9px 11px}
+.ig.full{grid-column:span 2}
+.ig-label{font-size:9px;color:var(--t4);letter-spacing:1px;text-transform:uppercase;font-family:sans-serif;margin-bottom:3px}
+.ig-value{font-size:12px;color:var(--t2);font-family:sans-serif;line-height:1.5}
+
+/* desc */
+.desc-text{font-size:13px;color:var(--t2);line-height:1.9}
+
+/* brew */
+.brew-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.brew-tag{
+  padding:4px 12px;border-radius:6px;font-size:12px;font-family:sans-serif;
+  background:var(--s3);border:1px solid var(--border);color:var(--t2);
+}
+.tips-text{font-size:12px;color:var(--t3);line-height:1.8;font-family:sans-serif}
+
+/* trivia */
+.trivia-toggle{
+  display:flex;align-items:center;gap:7px;
+  background:var(--s3);border:1px solid var(--border);border-radius:7px;
+  padding:8px 13px;color:var(--t3);font-size:12px;cursor:pointer;font-family:sans-serif;
+  transition:all .2s;width:100%;
+}
+.trivia-toggle:hover{background:#f0ece7;color:var(--t2)}
+.tarrow{transition:transform .2s;font-size:10px;color:var(--t4)}
+.tarrow.open{transform:rotate(90deg)}
+.tbody{overflow:hidden;max-height:0;transition:max-height .3s ease}
+.tbody.open{max-height:300px}
+.tbody-inner{
+  background:var(--s3);border:1px solid var(--border);border-top:none;
+  border-radius:0 0 7px 7px;padding:12px 14px;
+}
+.tbody-inner p{font-size:12px;color:var(--t3);line-height:1.85;font-family:sans-serif}
+
+/* memo */
+.memo-ta{
+  width:100%;min-height:100px;
+  background:var(--s3);border:1px solid var(--border);border-radius:7px;
+  color:var(--text);font-size:13px;font-family:'Georgia',serif;
+  padding:11px;resize:vertical;outline:none;line-height:1.7;
+  transition:border-color .2s;
+}
+.memo-ta:focus{border-color:var(--br2)}
+.memo-ta::placeholder{color:var(--t4)}
+.memo-footer{display:flex;align-items:center;gap:10px;margin-top:7px}
+.save-btn{
+  padding:7px 18px;border-radius:14px;
+  background:var(--brown);border:none;
+  color:#f0e8d8;font-size:12px;cursor:pointer;font-family:sans-serif;
+  transition:background .2s;
+}
+.save-btn:hover{background:var(--br2)}
+.save-ok{font-size:11px;color:var(--green);font-family:sans-serif;opacity:0;transition:opacity .3s}
+.save-ok.show{opacity:1}
+.char-cnt{margin-left:auto;font-size:11px;color:var(--t4);font-family:sans-serif}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+
+/* ── HAMBURGER BUTTON ── */
+.hd-right{display:flex;align-items:center}
+.hd-menu-btn{
+  width:38px;height:38px;border-radius:8px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:5px;
+  transition:background .2s;flex-shrink:0;margin-left:14px;
+}
+.hd-menu-btn:hover{background:rgba(255,255,255,.22)}
+.hd-menu-btn span{display:block;width:18px;height:2px;background:#f0e8d8;border-radius:1px}
+
+/* ── HAMBURGER POPUP ── */
+.hb-popup{
+  position:fixed;top:62px;right:16px;
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  box-shadow:0 6px 24px rgba(0,0,0,.16);padding:6px;min-width:200px;
+  opacity:0;pointer-events:none;transform:translateY(-6px);
+  transition:opacity .18s,transform .18s;z-index:300;
+}
+.hb-popup.open{opacity:1;pointer-events:auto;transform:translateY(0)}
+.hb-item{
+  display:flex;align-items:center;gap:10px;
+  width:100%;padding:10px 14px;border:none;background:transparent;
+  color:var(--t2);font-size:13px;cursor:pointer;font-family:sans-serif;
+  border-radius:7px;text-align:left;transition:background .12s;
+}
+.hb-item:hover{background:var(--s3)}
+
+/* ── FULL-SCREEN OVERLAY ── */
+.fs-ov{
+  position:fixed;inset:0;background:var(--bg);z-index:200;
+  display:flex;flex-direction:column;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.fs-ov.open{opacity:1;pointer-events:auto}
+.fs-hd{height:54px;background:var(--brown);flex-shrink:0;display:flex;align-items:stretch}
+.fs-tabs{display:flex;flex:1}
+.fs-tab{
+  height:100%;padding:0 22px;border:none;background:transparent;
+  color:rgba(240,232,216,.65);font-size:13px;cursor:pointer;
+  font-family:sans-serif;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;
+}
+.fs-tab.on{color:#f0e8d8;border-bottom-color:#f0e8d8;background:rgba(255,255,255,.1)}
+.fs-tab:hover:not(.on){color:#f0e8d8;background:rgba(255,255,255,.06)}
+.fs-close{
+  align-self:center;margin-right:16px;padding:7px 16px;border-radius:6px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  color:#f0e8d8;font-size:12px;cursor:pointer;font-family:sans-serif;transition:background .2s;
+}
+.fs-close:hover{background:rgba(255,255,255,.22)}
+.fs-body{flex:1;overflow-y:auto}
+.fs-page{display:none;padding:28px 40px 60px;max-width:1300px;margin:0 auto}
+.fs-page.on{display:block}
+.fs-page-h{font-size:15px;color:var(--brown);font-weight:normal;margin-bottom:4px}
+.fs-page-sub{font-size:11px;color:var(--t4);font-family:sans-serif;margin-bottom:22px}
+
+/* ── VARIETY PAGE ── */
+.sp-tabs{display:flex;gap:10px;margin-bottom:20px}
+.sp-tab{
+  padding:9px 22px;border-radius:24px;border:1px solid var(--border);
+  background:var(--card);color:var(--t2);font-size:13px;cursor:pointer;
+  font-family:sans-serif;transition:all .15s;
+}
+.sp-tab.on{background:var(--brown);color:#f0e8d8;border-color:var(--brown)}
+.sp-tab:hover:not(.on){background:var(--s3)}
+.sp-content{display:none}
+.sp-content.on{display:block}
+.sp-header{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:18px 24px;margin-bottom:20px;box-shadow:var(--shadow);
+}
+.sp-h-name{font-size:20px;color:var(--brown);margin-bottom:6px}
+.sp-h-name em{font-size:13px;color:var(--t3);font-style:italic;margin-left:8px}
+.sp-h-desc{font-size:12px;color:var(--t2);font-family:sans-serif;line-height:1.75}
+.var-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.var-grid-sm{grid-template-columns:repeat(2,1fr)}
+.var-group{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:var(--shadow)}
+.vg-head{font-size:13px;color:var(--brown);padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.vg-desc{font-size:10px;color:var(--t4);font-family:sans-serif;line-height:1.5;margin-bottom:10px}
+.vg-vars{display:flex;flex-wrap:wrap;gap:6px}
+.vv{
+  padding:5px 12px;border-radius:16px;font-size:11px;font-family:sans-serif;
+  background:var(--s3);border:1px solid var(--border);color:var(--t2);
+  cursor:pointer;transition:all .12s;
+}
+.vv:hover{background:var(--brown);color:#f0e8d8;border-color:var(--brown);transform:translateY(-1px)}
+.vv-sp{background:#fff8e8;border-color:var(--br4);color:var(--br2)}
+.vv-sp:hover{background:var(--br2);color:#f0e8d8;border-color:var(--br2)}
+
+/* floating tooltip */
+#vtTip{
+  position:fixed;z-index:500;
+  background:var(--brown);color:#f0e8d8;
+  padding:10px 14px;border-radius:8px;font-size:11px;
+  line-height:1.65;font-family:sans-serif;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
+  max-width:260px;pointer-events:none;
+  opacity:0;transition:opacity .15s;
+}
+#vtTip.show{opacity:1}
+
+/* ── PROCESS PAGE ── */
+.proc-intro{font-size:12px;color:var(--t2);font-family:sans-serif;line-height:1.75;margin-bottom:20px}
+.proc-grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.proc-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:var(--shadow)}
+.pc-name{font-size:13px;color:var(--brown);margin-bottom:2px}
+.pc-en{font-size:10px;color:var(--t4);font-family:sans-serif;margin-bottom:9px}
+.pc-flow{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:9px}
+.pc-step{background:var(--s3);border:1px solid var(--border);border-radius:4px;padding:3px 8px;font-size:10px;font-family:sans-serif;color:var(--t2)}
+.pc-arr{font-size:9px;color:var(--t4)}
+.pc-ctry{font-size:11px;color:var(--t3);font-family:sans-serif;line-height:1.6;margin-bottom:8px}
+.pc-ctry strong{color:var(--t2)}
+.pc-note{font-size:10px;color:var(--t3);font-family:sans-serif;line-height:1.5;background:var(--s3);border-radius:5px;padding:6px 9px}
+
+/* ── BREW PAGE ── */
+.brew-intro{font-size:12px;color:var(--t2);font-family:sans-serif;line-height:1.75;margin-bottom:20px}
+.brew-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.bc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;box-shadow:var(--shadow)}
+.bc-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.bc-icon{font-size:26px}
+.bc-name{font-size:14px;color:var(--brown)}
+.bc-en{font-size:10px;color:var(--t4);font-family:sans-serif}
+.bc-specs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.bc-sp{background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:7px 10px}
+.bc-sl{font-size:9px;color:var(--t4);letter-spacing:.8px;text-transform:uppercase;font-family:sans-serif;margin-bottom:3px}
+.bc-sv{font-size:12px;color:var(--t2);font-family:sans-serif;font-weight:500}
+.bc-note{font-size:11px;color:var(--t3);font-family:sans-serif;line-height:1.6}
+/* ── MAP SUB-TABS ── */
+.map-tab-nav{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
+.map-stab{flex:1;min-width:130px;padding:10px 6px;border:2px solid var(--border);border-radius:10px;background:var(--card);color:var(--t2);font-size:12px;cursor:pointer;text-align:center;line-height:1.4;transition:all .2s;font-family:sans-serif}
+.map-stab small{display:block;font-size:10px;margin-top:2px;opacity:.7}
+.map-stab:hover{opacity:.85}
+.map-stab[data-r="africa"].active{border-color:#E74C3C;color:#E74C3C;background:rgba(231,76,60,.12);font-weight:600}
+.map-stab[data-r="asia"].active{border-color:#2980B9;color:#2980B9;background:rgba(41,128,185,.12);font-weight:600}
+.map-stab[data-r="south"].active{border-color:#27AE60;color:#27AE60;background:rgba(39,174,96,.12);font-weight:600}
+.map-stab[data-r="central"].active{border-color:#E67E22;color:#E67E22;background:rgba(230,126,34,.12);font-weight:600}
+.map-zoom-wrap{position:relative;width:100%;height:0;overflow:hidden;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.15);margin-bottom:16px}
+.map-zoom-img{position:absolute;display:block;height:auto}
+.map-zoom-svg{position:absolute;cursor:crosshair}
+.map-country-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:8px;margin:12px 0 16px}
+.mcc{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;font-size:12px;color:var(--t1);transition:all .2s;line-height:1.5}
+.mcc:hover{border-color:var(--brown);background:rgba(111,69,42,.06)}
+.mcc span{display:block;font-size:10px;color:var(--t3);margin-top:2px}
+.map-region-desc{font-size:12px;color:var(--t2);line-height:1.7;padding:14px;background:var(--card);border-radius:10px;border:1px solid var(--border);margin-top:4px}
+/* ── COMMUNITY RATING ── */
+.comm-wrap{margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.comm-label{font-size:10px;color:var(--t3);font-family:sans-serif;margin-bottom:3px;letter-spacing:.5px}
+.comm-val{font-size:17px;color:#e8a000;font-weight:bold;font-family:sans-serif}
+.comm-val small{font-size:11px;color:var(--t3);font-weight:normal;margin-left:4px}
+/* ── MOBILE BACK BUTTON ── */
+.mob-back{display:none;align-items:center;gap:4px;background:none;border:none;color:var(--brown);font-size:13px;cursor:pointer;padding:0 0 12px;font-family:sans-serif;font-weight:500}
+/* ── MOBILE (≤640px) ── */
+@media(max-width:640px){
+  header{height:52px}
+  .hd-sub,.hd-stats{display:none}
+  .hd-icon{font-size:22px}
+  .hd-title{font-size:15px}
+  .toolbar{padding:0 10px;gap:4px}
+  .sw input{width:140px}
+  .main{flex-direction:column;height:auto;min-height:calc(100vh - 90px)}
+  .list-panel{width:100%;min-width:0;height:42vh;max-height:42vh;border-right:none;border-bottom:1px solid var(--border)}
+  .detail-panel{min-height:58vh}
+  .main.mob-detail .list-panel{display:none}
+  .main.mob-detail .detail-panel{height:calc(100vh - 90px);min-height:unset}
+  .mob-back{display:flex}
+  .dc{padding:12px 14px 40px}
+  .dh{flex-direction:column;gap:10px}
+  .dh-name{font-size:20px}
+  .info-grid{grid-template-columns:1fr}
+  .ig.full{grid-column:span 1}
+  .fs-hd{height:44px}
+  .fs-tabs{overflow-x:auto}
+  .fs-tab{padding:0 10px;font-size:11px}
+  .fs-close{padding:5px 10px;font-size:11px;margin-right:8px}
+  .fs-page{padding:14px 14px 48px}
+  .fs-page-h{font-size:13px}
+  .var-grid{grid-template-columns:1fr 1fr}
+  .var-grid-sm{grid-template-columns:1fr}
+  .proc-grid4{grid-template-columns:1fr 1fr}
+  .brew-grid3{grid-template-columns:1fr}
+  .map-tab-nav{gap:4px}
+  .map-stab{min-width:60px;font-size:10px;padding:8px 4px}
+  .map-country-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd-brand">
+    <div class="hd-icon">☕</div>
+    <div>
+      <div class="hd-title">Coffee Journal</div>
+      <div class="hd-sub">世界のコーヒー産地を探索する</div>
+    </div>
+  </div>
+  <div class="hd-right">
+    <div class="hd-stats" id="hdStats"></div>
+    <button class="hd-menu-btn" onclick="toggleHbMenu()" title="コーヒー図鑑メニュー">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<div class="toolbar">
+  <div class="sw">
+    <span class="si">🔍</span>
+    <input type="text" id="q" placeholder="産地・フレーバー・品種で検索">
+  </div>
+  <div class="sep"></div>
+  <button class="tb-btn on" id="f-all"     onclick="setCont('all')">すべて</button>
+  <button class="tb-btn"    id="f-africa"  onclick="setCont('africa')">🌍 アフリカ</button>
+  <button class="tb-btn"    id="f-asia"    onclick="setCont('asia')">🌏 アジア・太平洋</button>
+  <button class="tb-btn"    id="f-south"   onclick="setCont('south')">🌎 南米</button>
+  <button class="tb-btn"    id="f-central" onclick="setCont('central')">🌎 中米・カリブ</button>
+  <div class="sep"></div>
+  <button class="tb-btn" id="x-fav"   onclick="toggleExtra('fav')">❤️ お気に入り</button>
+  <button class="tb-btn" id="x-note"  onclick="toggleExtra('note')">📝 メモ済み</button>
+  <button class="tb-btn" id="x-rated" onclick="toggleExtra('rated')">⭐ 評価済み</button>
+  <div class="sep"></div>
+  <select class="sort-sel" id="sortSel" onchange="applyFilters()">
+    <option value="">並び順</option>
+    <option value="name">名前順</option>
+    <option value="rate-d">評価が高い順</option>
+    <option value="acid-d">酸味が強い順</option>
+    <option value="body-d">コクが強い順</option>
+    <option value="alt-d">標高が高い順</option>
+  </select>
+</div>
+
+<div class="main">
+  <aside class="list-panel">
+    <div class="list-count" id="lc">-</div>
+    <div class="list-scroll" id="ls"></div>
+  </aside>
+  <main class="detail-panel" id="dp">
+    <div class="placeholder">
+      <div class="ph-icon">☕</div>
+      <div class="ph-text">産地を選んでください</div>
+      <div class="ph-sub">左リストから気になる産地をクリック</div>
+    </div>
+  </main>
+</div>
+
+<!-- ── TOOLTIP ── -->
+<div id="vtTip"></div>
+
+<!-- ── HAMBURGER POPUP ── -->
+<div id="hbPopup" class="hb-popup">
+  <button class="hb-item" onclick="openFS('variety')">🌿 全品種の系統図</button>
+  <button class="hb-item" onclick="openFS('process')">⚙️ 精製方法一覧</button>
+  <button class="hb-item" onclick="openFS('brew')">☕ ドリップメソッド</button>
+  <button class="hb-item" onclick="openFS('bean')">📚 コーヒー豆知識</button>
+  <button class="hb-item" onclick="openFS('map')">🗺️ 世界地図で見る</button>
+</div>
+
+<!-- ── FULL-SCREEN OVERLAY ── -->
+<div id="fsOv" class="fs-ov">
+  <div class="fs-hd">
+    <div class="fs-tabs">
+      <button class="fs-tab" data-p="variety" onclick="switchFS('variety')">🌿 全品種の系統図</button>
+      <button class="fs-tab" data-p="process" onclick="switchFS('process')">⚙️ 精製方法一覧</button>
+      <button class="fs-tab" data-p="brew"    onclick="switchFS('brew')">☕ ドリップメソッド</button>
+      <button class="fs-tab" data-p="bean"   onclick="switchFS('bean')">📚 豆知識</button>
+      <button class="fs-tab" data-p="map"    onclick="switchFS('map')">🗺️ 世界地図</button>
+    </div>
+    <button class="fs-close" onclick="closeFS()">✕ 閉じる</button>
+  </div>
+  <div class="fs-body">
+
+    <!-- ══ VARIETY ══ -->
+    <div id="fp-variety" class="fs-page">
+      <p class="fs-page-h">全品種の系統図</p>
+      <p class="fs-page-sub">品種ノードにカーソルを合わせると産地・風味・特徴が表示されます　✦ = スペシャルティ市場で特に注目の品種</p>
+      <div class="sp-tabs">
+        <button class="sp-tab on" data-sp="arabica"  onclick="switchSP('arabica')">🌿 アラビカ種</button>
+        <button class="sp-tab"    data-sp="robusta"  onclick="switchSP('robusta')">⚡ ロブスタ種</button>
+        <button class="sp-tab"    data-sp="liberica" onclick="switchSP('liberica')">🌺 リベリカ種</button>
+      </div>
+
+      <div id="sp-arabica" class="sp-content on">
+        <div class="sp-header">
+          <div class="sp-h-name">🌿 アラビカ種 <em>Coffea arabica</em></div>
+          <div class="sp-h-desc">全生産量の約60〜65%を占める高品質種。エチオピア高地が原産。標高1,000m以上を好む繊細な品種。カフェイン含有量はロブスタの約半分（約1.2%）。複雑なフレーバーを持ちスペシャルティコーヒーの大半はアラビカ種。</div>
+        </div>
+        <div class="var-grid">
+          <div class="var-group">
+            <div class="vg-head">Typica系（ティピカ系）</div>
+            <div class="vg-desc">最古のアラビカ系統。エチオピア→イエメン→インド経由で世界へ。繊細で上品な風味。現代品種の多くの祖先。</div>
+            <div class="vg-vars">
+              <div class="vv" data-tip="品種：Typica（ティピカ）&#10;産地：ジャマイカ・ハワイ・ペルー・東ティモール&#10;風味：上品でマイルド・クリーン・繊細な甘味&#10;特徴：コーヒーの原点。低収量で繊細。先細りの豆形。">Typica</div>
+              <div class="vv" data-tip="品種：Blue Mountain&#10;産地：ジャマイカ（標高2,000m超のブルーマウンテン山脈）&#10;風味：マイルド・バランス最高・甘味・穏やかな酸&#10;特徴：世界最高価格クラス。ティピカの変種。霧に覆われた山脈で栽培。">Blue Mountain</div>
+              <div class="vv" data-tip="品種：Maragogipe（マラゴジッペ・象豆）&#10;産地：ブラジル・グアテマラ・メキシコ&#10;風味：軽めでマイルド・クリーン&#10;特徴：ティピカの突然変異。通常の2〜3倍の巨大豆。希少品として高値がつく。">Maragogipe</div>
+              <div class="vv" data-tip="品種：Kona（コナ）&#10;産地：ハワイ島コナ地区（マウナロア火山の西斜面）&#10;風味：スムーズ・ナッツ・フルーティー・クリーン&#10;特徴：朝に雲が立ち込める独特の気候。米国最高級コーヒーとして有名。">Kona</div>
+              <div class="vv" data-tip="品種：Sumatra系（マンデリン等）&#10;産地：インドネシア・スマトラ島&#10;風味：アーシー・ハーバル・重厚なボディ・低酸味&#10;特徴：スマトラ式（ギリン・バサ）精製で独特の土っぽい風味が生まれる。">Sumatra系</div>
+            </div>
+          </div>
+          <div class="var-group">
+            <div class="vg-head">Bourbon系（ブルボン系）</div>
+            <div class="vg-desc">ティピカがブルボン島（現レユニオン島）で突然変異。甘みが強くフルーティー。ティピカより収量が多く現代品種の多くの交配親。</div>
+            <div class="vg-vars">
+              <div class="vv" data-tip="品種：Bourbon（ブルボン）&#10;産地：ブラジル・ルワンダ・ブルンジ・エルサルバドル&#10;風味：フルーティーな甘味・赤リンゴ・チョコ・バランス良好&#10;特徴：ティピカより収量20〜30%多い。複雑な甘みが特徴。赤・黄・ピンクと色変種もある。">Bourbon</div>
+              <div class="vv vv-sp" data-tip="品種：SL28 / SL34&#10;産地：ケニア（Scott Laboratoriesが1930年代に選抜）&#10;風味：ブラックカラント・グレープフルーツ・ワイン・強烈な果実酸&#10;特徴：ケニアAAの代名詞。スペシャルティ愛好家に最も人気の品種のひとつ。">SL28 / SL34 ✦</div>
+              <div class="vv" data-tip="品種：Caturra（カトゥーラ）&#10;産地：コスタリカ・コロンビア・ニカラグア&#10;風味：明るい酸味・シトラス・クリーン・軽快&#10;特徴：ブルボンの矮性突然変異。管理しやすく収量多い。高地では品質が高い。">Caturra</div>
+              <div class="vv" data-tip="品種：Catuai（カトゥアイ）&#10;産地：ブラジル・中南米各地&#10;風味：バランス良好・マイルド・チョコ・ナッツ&#10;特徴：カトゥーラ×ムンドノーボ交配。収量が多く風雨への耐性が高い。">Catuai</div>
+              <div class="vv" data-tip="品種：Mundo Novo（ムンドノーボ）&#10;産地：ブラジル（主力品種のひとつ）&#10;風味：バランス・マイルド・チョコ&#10;特徴：ティピカ×ブルボンの自然交配。収量多く病害に強い。ブラジルコーヒー産業の礎。">Mundo Novo</div>
+              <div class="vv" data-tip="品種：Villa Sarchi&#10;産地：コスタリカ&#10;風味：鮮やかな酸味・フルーティー・明るい&#10;特徴：コスタリカのブルボン矮性種。高標高での栽培に最適化された品種。">Villa Sarchi</div>
+              <div class="vv" data-tip="品種：Pink Bourbon（ピンクブルボン）&#10;産地：コロンビア（ウイラ・ナリーニョ）&#10;風味：ストロベリー・ラズベリー・フローラル・強い甘み&#10;特徴：近年コロンビアで注目急上昇。赤・黄ブルボンとは別系統とされる希少種。">Pink Bourbon</div>
+            </div>
+          </div>
+          <div class="var-group">
+            <div class="vg-head">ゲイシャ系</div>
+            <div class="vg-desc">エチオピア西部ゲシャ地方原産（1931年採取）。2004年パナマのエスメラルダ農園で世界的注目を浴びスペシャルティ最高峰品種のひとつに。</div>
+            <div class="vg-vars">
+              <div class="vv vv-sp" data-tip="品種：Geisha / Gesha（ゲイシャ）&#10;産地：パナマ・コスタリカ・コロンビア・エチオピア・日本&#10;風味：ジャスミン・ベルガモット・ピーチ・マンゴー・紅茶&#10;特徴：世界コーヒーオークションで最高値を連発。フローラル香の極致。病害にも強い高木。">Geisha / Gesha ✦</div>
+            </div>
+          </div>
+          <div class="var-group">
+            <div class="vg-head">エチオピア在来種（Heirloom）</div>
+            <div class="vg-desc">800種以上の野生在来種が自生するコーヒーの遺伝的多様性の宝庫。多くの現代品種の祖先がここに存在する。</div>
+            <div class="vg-vars">
+              <div class="vv" data-tip="品種：Heirloom / Landrace（在来種群）&#10;産地：エチオピア全土（イルガチェフェ・シダマ・リム・ゴジ等）&#10;風味：産地・精製法により千差万別。ブルーベリー・ジャスミン・シトラスなど&#10;特徴：800種超の中から各農園が自然選抜。エチオピアの多様性そのもの。">Heirloom</div>
+              <div class="vv" data-tip="品種：Kurume / Wolisho / Dega&#10;産地：エチオピア高地&#10;特徴：JARCが選抜・登録した主要エチオピア品種。標高に応じてDega（高地）・Wolisho（中地）・Kurume（低地）に大別。環境適応が異なる。">Kurume / Wolisho</div>
+            </div>
+          </div>
+          <div class="var-group">
+            <div class="vg-head">ハイブリッド・交配種</div>
+            <div class="vg-desc">ロブスタとの交配などで生まれた耐病性の高い品種群。1970〜80年代のさび病パンデミックへの対策として多くが開発された。</div>
+            <div class="vg-vars">
+              <div class="vv" data-tip="品種：Hybrid de Timor (HdT)&#10;産地：東ティモール（自然発生）&#10;特徴：アラビカ×ロブスタの自然交配種。さび病への強い耐性を持つ。CatimorやSarchimorなど多くの耐病性品種の交配親。">Hybrid de Timor</div>
+              <div class="vv" data-tip="品種：Catimor（カティモール）&#10;産地：中南米・インドネシア・ベトナム・中国&#10;風味：さっぱりした酸味・ナッツ・チョコ&#10;特徴：HdT×カトゥーラ交配。耐さび病性が高く多産。アラビカの繊細さがやや薄れる場合も。">Catimor</div>
+              <div class="vv" data-tip="品種：Ruiru 11&#10;産地：ケニア（コーヒー研究所が開発）&#10;特徴：複合耐病性品種。さび病・コーヒーベリーボーラーへの耐性。収量が高く農家向き。SL品種に比べ風味はやや平凡とも。">Ruiru 11</div>
+              <div class="vv" data-tip="品種：Castillo（カスティージョ）&#10;産地：コロンビア（Cenicafé開発）&#10;風味：チョコ・キャラメル・バランス良好&#10;特徴：コロンビアのさび病被害（2008〜）後に急速普及。耐病性と品質のバランスが高評価。">Castillo</div>
+            </div>
+          </div>
+          <div class="var-group">
+            <div class="vg-head">その他の注目品種</div>
+            <div class="vg-desc">Typica・Bourbon系に起源を持つが独自の個性で注目を集める品種群。スペシャルティ市場で高い評価を受ける。</div>
+            <div class="vg-vars">
+              <div class="vv" data-tip="品種：Pacamara（パカマラ）&#10;産地：エルサルバドル・ニカラグア・グアテマラ&#10;風味：チョコ・フルーツ・フローラル・複雑な甘み&#10;特徴：パカス×マラゴジッペ交配。大粒豆でスペシャルティ市場で人気。">Pacamara</div>
+              <div class="vv" data-tip="品種：Laurina / Bourbon Pointu&#10;産地：レユニオン島・グアドループ&#10;風味：上品な甘み・低苦味・フローラル&#10;特徴：カフェイン含有量が通常の約1/3。先が尖った独特の豆形。極めて希少で高価。">Laurina（低カフェイン）</div>
+              <div class="vv vv-sp" data-tip="品種：Batian&#10;産地：ケニア（コーヒー研究所が開発）&#10;特徴：ケニアの新品種。SL28/SL34の後継として耐病性と高品質を両立。近年ケニア産でも見かけるようになってきた。">Batian ✦</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="sp-robusta" class="sp-content">
+        <div class="sp-header">
+          <div class="sp-h-name">⚡ ロブスタ種 <em>Coffea canephora</em></div>
+          <div class="sp-h-desc">全生産量の約35〜40%を占める。原産はコンゴ盆地。低地・高温多湿・病害に強い。カフェイン含有量はアラビカの約2倍（約2.7%）。強い苦味とコクが特徴でエスプレッソブレンドやインスタントコーヒーに多用される。</div>
+        </div>
+        <div class="var-grid var-grid-sm">
+          <div class="var-group">
+            <div class="vg-head">主要品種・系統</div>
+            <div class="vg-desc">低標高でも育ち、さび病などの病害に強い。収量が多く生産コストが低い。</div>
+            <div class="vg-vars">
+              <div class="vv" data-tip="品種：Robusta（主流）&#10;主産地：ベトナム・ブラジル・インドネシア・コートジボワール・ウガンダ&#10;風味：強い苦味・アース・チョコ・ゴム感&#10;特徴：インスタントコーヒーとエスプレッソブレンドの主役。クレマが出やすい。">Robusta</div>
+              <div class="vv" data-tip="品種：Uganda / Congensis系&#10;産地：ウガンダ・コンゴ・中央アフリカ&#10;特徴：ロブスタの野生種に近い品種群。コンゴはロブスタ原産地で多様な野生種が自生。">Uganda / Congensis系</div>
+              <div class="vv" data-tip="品種：Quillon（クイロン）&#10;産地：フィリピン&#10;特徴：フィリピンで栽培されるロブスタ系品種。リベリカと混栽されることも多い現地固有の栽培品種。">Quillon</div>
+            </div>
+          </div>
+          <div class="var-group">
+            <div class="vg-head">ロブスタ種の特性</div>
+            <div class="vg-desc" style="font-size:11px;line-height:1.9;color:var(--t2)">
+              <b>カフェイン：</b> 約2.7%（アラビカの約2倍）<br>
+              <b>栽培高度：</b> 0〜800m（低地OK）<br>
+              <b>さび病耐性：</b> 強い<br>
+              <b>収量：</b> アラビカの約2〜3倍<br>
+              <b>クレマ：</b> エスプレッソで豊かなクレマ<br>
+              <b>主な用途：</b> インスタント・エスプレッソブレンド
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="sp-liberica" class="sp-content">
+        <div class="sp-header">
+          <div class="sp-h-name">🌺 リベリカ種 <em>Coffea liberica</em></div>
+          <div class="sp-h-desc">全生産量の1%未満の超希少種。西アフリカ・リベリア原産。大型の葉・果実・豆が特徴。独特のウッディ・フローラルな風味。19世紀のさび病でアラビカが壊滅した後に代替として普及したが現在は激減。フィリピン・マレーシアで珍重される。</div>
+        </div>
+        <div class="var-grid var-grid-sm">
+          <div class="var-group">
+            <div class="vg-head">主要品種・亜種</div>
+            <div class="vg-desc">フィリピン・マレーシアを中心に細々と栽培が続く希少品種群。</div>
+            <div class="vg-vars">
+              <div class="vv" data-tip="品種：Liberica / Barako（バラコ）&#10;主産地：フィリピン（バタンガス州）・マレーシア・リベリア&#10;風味：ウッディ・フローラル・独特のスモーキー・強い香り&#10;特徴：フィリピンの国民的コーヒー「バラコ」として親しまれる。豆が大きく果実感が強い。">Liberica / Barako</div>
+              <div class="vv" data-tip="品種：Excelsa（エクセルサ）&#10;産地：フィリピン・東南アジア各地&#10;風味：フルーティー・タルト・ダーク・複雑&#10;特徴：現在はリベリカの亜種に分類。ベトナムのブレンドにも使用。独特の複雑な風味が一部で評価される。">Excelsa（亜種）</div>
+            </div>
+          </div>
+          <div class="var-group">
+            <div class="vg-head">リベリカ種の特性</div>
+            <div class="vg-desc" style="font-size:11px;line-height:1.9;color:var(--t2)">
+              <b>生産量：</b> 世界の1%未満（超希少）<br>
+              <b>豆サイズ：</b> アラビカの約2倍の大型豆<br>
+              <b>木の高さ：</b> 最大20mに達する高木<br>
+              <b>耐熱性：</b> 高温多湿に強い<br>
+              <b>風味：</b> 独特のウッディ・スモーキー<br>
+              <b>主産地：</b> フィリピン・マレーシア・西アフリカ
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /fp-variety -->
+
+    <!-- ══ PROCESS ══ -->
+    <div id="fp-process" class="fs-page">
+      <p class="fs-page-h">精製方法一覧</p>
+      <p class="proc-intro">収穫後のコーヒーチェリーからどのように生豆を取り出すか——その精製方法が風味に決定的な影響を与えます。同じ産地・品種でも精製方法が異なれば全く別の味わいになります。</p>
+      <div class="proc-grid4">
+        <div class="proc-card">
+          <div class="pc-name">ウォッシュド（水洗式）</div><div class="pc-en">Washed / Wet Process</div>
+          <div class="pc-flow"><span class="pc-step">🍒 チェリー</span><span class="pc-arr">→</span><span class="pc-step">果肉除去</span><span class="pc-arr">→</span><span class="pc-step">発酵槽</span><span class="pc-arr">→</span><span class="pc-step">水洗い</span><span class="pc-arr">→</span><span class="pc-step">天日乾燥</span></div>
+          <div class="pc-ctry"><strong>主産地：</strong>エチオピア・ケニア・コロンビア・グアテマラ・コスタリカ・中南米大半</div>
+          <div class="pc-note">✨ クリーンでフルーティー。産地の個性が素直に出る。明るい酸味が特徴的。</div>
+        </div>
+        <div class="proc-card">
+          <div class="pc-name">ナチュラル（乾燥式）</div><div class="pc-en">Natural / Dry Process</div>
+          <div class="pc-flow"><span class="pc-step">🍒 チェリー</span><span class="pc-arr">→</span><span class="pc-step">そのまま天日乾燥</span><span class="pc-arr">→</span><span class="pc-step">脱穀・精製</span></div>
+          <div class="pc-ctry"><strong>主産地：</strong>エチオピア・ブラジル・イエメン・エリトリア</div>
+          <div class="pc-note">🍓 強烈な果実感・ベリー系の甘み・発酵フレーバー。水が少ない地域に適する。</div>
+        </div>
+        <div class="proc-card">
+          <div class="pc-name">ハニー（ハニープロセス）</div><div class="pc-en">Honey Process</div>
+          <div class="pc-flow"><span class="pc-step">🍒 チェリー</span><span class="pc-arr">→</span><span class="pc-step">果肉除去</span><span class="pc-arr">→</span><span class="pc-step">粘液質を残して乾燥</span><span class="pc-arr">→</span><span class="pc-step">脱穀</span></div>
+          <div class="pc-ctry"><strong>主産地：</strong>コスタリカ・エルサルバドル・ホンジュラス・グアテマラ</div>
+          <div class="pc-note">🍯 甘みとクリーン感のバランス。残す粘液質の量でYellow / Red / Black Honeyに分類。</div>
+        </div>
+        <div class="proc-card">
+          <div class="pc-name">スマトラ式（ギリン・バサ）</div><div class="pc-en">Wet Hulled / Giling Basah</div>
+          <div class="pc-flow"><span class="pc-step">🍒 チェリー</span><span class="pc-arr">→</span><span class="pc-step">果肉除去</span><span class="pc-arr">→</span><span class="pc-step">短時間発酵</span><span class="pc-arr">→</span><span class="pc-step">生乾きで脱穀</span><span class="pc-arr">→</span><span class="pc-step">再乾燥</span></div>
+          <div class="pc-ctry"><strong>主産地：</strong>インドネシア（スマトラ・スラウェシ・フローレス）</div>
+          <div class="pc-note">🌿 アーシー・ハーブ・重厚ボディ・低酸。生乾き段階で脱穀するインドネシア独自手法。</div>
+        </div>
+        <div class="proc-card">
+          <div class="pc-name">アナエロビック発酵</div><div class="pc-en">Anaerobic Fermentation</div>
+          <div class="pc-flow"><span class="pc-step">🍒 チェリー</span><span class="pc-arr">→</span><span class="pc-step">密閉タンクで嫌気発酵</span><span class="pc-arr">→</span><span class="pc-step">果肉除去</span><span class="pc-arr">→</span><span class="pc-step">乾燥</span></div>
+          <div class="pc-ctry"><strong>主産地：</strong>コロンビア・コスタリカ・エチオピア・中南米各地</div>
+          <div class="pc-note">🧪 強烈な発酵感・ワイン・トロピカルフルーツ。酸素を遮断し発酵を制御して複雑なフレーバーを生む。</div>
+        </div>
+        <div class="proc-card">
+          <div class="pc-name">カーボニックマセレーション</div><div class="pc-en">Carbonic Maceration (CM)</div>
+          <div class="pc-flow"><span class="pc-step">🍒 チェリー</span><span class="pc-arr">→</span><span class="pc-step">CO₂充填タンク</span><span class="pc-arr">→</span><span class="pc-step">細胞内発酵</span><span class="pc-arr">→</span><span class="pc-step">果肉除去→乾燥</span></div>
+          <div class="pc-ctry"><strong>主産地：</strong>コロンビア・コスタリカ・エチオピア</div>
+          <div class="pc-note">🍷 ワイン醸造技術を転用。ジューシーな果実感と鮮やかなフルーティーさが特徴。</div>
+        </div>
+        <div class="proc-card">
+          <div class="pc-name">マンスーンド（モンスーン）</div><div class="pc-en">Monsooned Malabar</div>
+          <div class="pc-flow"><span class="pc-step">☀️ 生豆</span><span class="pc-arr">→</span><span class="pc-step">モンスーン季節風に曝す</span><span class="pc-arr">→</span><span class="pc-step">吸湿・膨張・熟成（約3ヶ月）</span></div>
+          <div class="pc-ctry"><strong>主産地：</strong>インド（ケーララ州・カルナータカ州マラバール海岸）</div>
+          <div class="pc-note">🌊 帆船時代の長旅で変質した豆を再現。低酸・アーシー・スパイシー・重厚なボディ。</div>
+        </div>
+        <div class="proc-card">
+          <div class="pc-name">実験的・特殊プロセス</div><div class="pc-en">Experimental Processes</div>
+          <div class="pc-flow"><span class="pc-step">Lactic酸発酵</span><span class="pc-arr">・</span><span class="pc-step">ワイン樽熟成</span><span class="pc-arr">・</span><span class="pc-step">酵母添加発酵</span></div>
+          <div class="pc-ctry"><strong>主産地：</strong>コロンビア・コスタリカ・台湾・日本など</div>
+          <div class="pc-note">🔬 特定の酵母・果汁・酵素を添加して発酵を制御。コーヒーの新しい可能性を追求する最先端手法。</div>
+        </div>
+      </div>
+    </div><!-- /fp-process -->
+
+    <!-- ══ BREW ══ -->
+    <div id="fp-brew" class="fs-page">
+      <p class="fs-page-h">ドリップメソッド一覧</p>
+      <p class="brew-intro">ドリップ式の各メソッド。レシオ・湯温・時間・挽き目の目安です。豆の鮮度・焙煎度・好みに合わせて調整してください。</p>
+      <div class="brew-grid3">
+        <div class="bc"><div class="bc-head"><div class="bc-icon">☕</div><div><div class="bc-name">ハンドドリップ</div><div class="bc-en">Pour Over</div></div></div><div class="bc-specs"><div class="bc-sp"><div class="bc-sl">レシオ</div><div class="bc-sv">1 : 15</div></div><div class="bc-sp"><div class="bc-sl">湯温</div><div class="bc-sv">90〜93℃</div></div><div class="bc-sp"><div class="bc-sl">時間</div><div class="bc-sv">3〜4分</div></div><div class="bc-sp"><div class="bc-sl">挽き目</div><div class="bc-sv">中〜中細挽き</div></div></div><div class="bc-note"><b>テクニック：</b> 蒸らし30秒→3〜4回に分けて注湯。細く円を描くように注ぐ。<br><b>特徴：</b> 産地の個性が最も素直に出やすい抽出法。フィルターの種類（ペーパー・金属・布）で風味が変わる。<br><b>難易度：</b> ⭐⭐⭐（湯温・注ぎ加減の調整が重要）</div></div>
+
+        <div class="bc"><div class="bc-head"><div class="bc-icon">🧵</div><div><div class="bc-name">ネルドリップ</div><div class="bc-en">Nel Drip / Flannel</div></div></div><div class="bc-specs"><div class="bc-sp"><div class="bc-sl">レシオ</div><div class="bc-sv">1 : 10〜13</div></div><div class="bc-sp"><div class="bc-sl">湯温</div><div class="bc-sv">88〜92℃</div></div><div class="bc-sp"><div class="bc-sl">時間</div><div class="bc-sv">3〜5分</div></div><div class="bc-sp"><div class="bc-sl">挽き目</div><div class="bc-sv">中〜中粗挽き</div></div></div><div class="bc-note"><b>テクニック：</b> 布フィルターは毎回水で湿らせてから使用。使用後は冷蔵保管（カビ防止）。<br><b>特徴：</b> 布フィルターがオイルを透過するため、まろやかでトロリとした質感。日本の喫茶店文化の象徴。<br><b>難易度：</b> ⭐⭐⭐⭐（フィルター管理が必須）</div></div>
+
+        <div class="bc"><div class="bc-head"><div class="bc-icon">🔺</div><div><div class="bc-name">ケメックス</div><div class="bc-en">Chemex</div></div></div><div class="bc-specs"><div class="bc-sp"><div class="bc-sl">レシオ</div><div class="bc-sv">1 : 15〜17</div></div><div class="bc-sp"><div class="bc-sl">湯温</div><div class="bc-sv">90〜93℃</div></div><div class="bc-sp"><div class="bc-sl">時間</div><div class="bc-sv">4〜5分</div></div><div class="bc-sp"><div class="bc-sl">挽き目</div><div class="bc-sv">中粗挽き</div></div></div><div class="bc-note"><b>テクニック：</b> 専用の分厚いフィルターを二重に折ったものを使用。注ぐスピードはゆっくり（4〜5分）。<br><b>特徴：</b> 厚手フィルターでクリーンに抽出。デザインはMoMAコレクション入り。透明感と上質感が出る。<br><b>難易度：</b> ⭐⭐（シンプルで安定）</div></div>
+
+        <div class="bc"><div class="bc-head"><div class="bc-icon">🔵</div><div><div class="bc-name">クレバードリッパー</div><div class="bc-en">Clever Dripper</div></div></div><div class="bc-specs"><div class="bc-sp"><div class="bc-sl">レシオ</div><div class="bc-sv">1 : 15</div></div><div class="bc-sp"><div class="bc-sl">湯温</div><div class="bc-sv">90〜93℃</div></div><div class="bc-sp"><div class="bc-sl">時間</div><div class="bc-sv">4分（浸漬）</div></div><div class="bc-sp"><div class="bc-sl">挽き目</div><div class="bc-sv">中挽き</div></div></div><div class="bc-note"><b>テクニック：</b> 浸漬式なので、全量注いでそのまま4分待つ。サーバーに乗せたら自動で抽出開始。<br><b>特徴：</b> 弁が開き抽出。シンプルで再現性が高く、安定した味が出せる。初心者向け。<br><b>難易度：</b> ⭐（最も簡単）</div></div>
+
+        <div class="bc"><div class="bc-head"><div class="bc-icon">🧊</div><div><div class="bc-name">アイスドリップ</div><div class="bc-en">Slow Drip / Japanese Ice Drip</div></div></div><div class="bc-specs"><div class="bc-sp"><div class="bc-sl">レシオ</div><div class="bc-sv">1 : 15（氷約40～50%）</div></div><div class="bc-sp"><div class="bc-sl">湯温</div><div class="bc-sv">90〜93℃（初期）</div></div><div class="bc-sp"><div class="bc-sl">時間</div><div class="bc-sv">3〜4分</div></div><div class="bc-sp"><div class="bc-sl">挽き目</div><div class="bc-sv">中細〜中挽き</div></div></div><div class="bc-note"><b>テクニック：</b> 金属製のドリップタワーを使用。上部のタンクに氷と水を1:1の比率で入れ、バルブで速度調整。1～2秒に1滴の速度が目安。<br><b>レシピ例（コップ1杯130ml）：</b> 豆9g、氷60ml、水60ml混合。氷50%、水50%。中細挽きで3～4分で完成。<br><b>特徴：</b> 低温抽出により苦味が出ず、甘みと透明感が極大化。夏の最高峰。待つ時間も風情。時間はかかるが味は他に類なし。<br><b>難易度：</b> ⭐⭐（バルブ調整は慣れが必要）</div></div>
+      </div>
+    </div><!-- /fp-brew -->
+
+    <!-- ══ BEAN KNOWLEDGE ══ -->
+    <div id="fp-bean" class="fs-page">
+      <p class="fs-page-h">コーヒー豆知識</p>
+      <p class="fs-page-sub">コーヒーチェリーの構造と、各精製方法との関係を理解することで、風味の違いがなぜ生まれるのかが分かります。</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:28px">
+        <!-- コーヒーチェリー断面図 -->
+        <div style="display:flex;align-items:center;justify-content:center;padding:10px">
+          <svg viewBox="0 0 440 320" style="max-width:440px;width:100%">
+            <defs>
+              <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 Z" fill="#888"/>
+              </marker>
+            </defs>
+            <!-- タイトル -->
+            <text x="130" y="18" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#4e2f14" font-weight="bold">コーヒーチェリー 断面図</text>
+            <!-- 果皮（外皮） -->
+            <circle cx="130" cy="168" r="88" fill="#C0392B"/>
+            <!-- 果肉（ムシラージ） -->
+            <circle cx="130" cy="168" r="76" fill="#E67E22"/>
+            <!-- パーチメント -->
+            <circle cx="130" cy="168" r="62" fill="#D4AC0D"/>
+            <!-- シルバースキン -->
+            <circle cx="130" cy="168" r="55" fill="#C9A96E"/>
+            <!-- 生豆A（右） -->
+            <ellipse cx="142" cy="168" rx="28" ry="38" fill="#58D68D" transform="rotate(-10,142,168)"/>
+            <!-- 生豆B（左） -->
+            <ellipse cx="118" cy="168" rx="28" ry="38" fill="#2ECC71" transform="rotate(10,118,168)"/>
+            <!-- 中心合わせ目 -->
+            <line x1="130" y1="130" x2="130" y2="206" stroke="rgba(0,90,0,0.35)" stroke-width="1.5"/>
+            <!-- 引き出し線＋ラベル -->
+            <line x1="216" y1="138" x2="220" y2="142" stroke="#888" stroke-width="1" marker-end="url(#arr)"/>
+            <line x1="228" y1="131" x2="217" y2="137" stroke="#888" stroke-width="1"/>
+            <text x="230" y="128" font-family="sans-serif" font-size="11.5" fill="#333">① 果皮（外皮）</text>
+            <line x1="206" y1="160" x2="210" y2="160" stroke="#888" stroke-width="1" marker-end="url(#arr)"/>
+            <line x1="228" y1="153" x2="207" y2="160" stroke="#888" stroke-width="1"/>
+            <text x="230" y="150" font-family="sans-serif" font-size="11.5" fill="#333">② 果肉・ムシラージ</text>
+            <line x1="192" y1="177" x2="195" y2="174" stroke="#888" stroke-width="1" marker-end="url(#arr)"/>
+            <line x1="228" y1="175" x2="193" y2="175" stroke="#888" stroke-width="1"/>
+            <text x="230" y="172" font-family="sans-serif" font-size="11.5" fill="#333">③ パーチメント</text>
+            <line x1="184" y1="193" x2="186" y2="190" stroke="#888" stroke-width="1" marker-end="url(#arr)"/>
+            <line x1="228" y1="197" x2="185" y2="191" stroke="#888" stroke-width="1"/>
+            <text x="230" y="194" font-family="sans-serif" font-size="11.5" fill="#333">④ シルバースキン</text>
+            <line x1="168" y1="210" x2="170" y2="207" stroke="#888" stroke-width="1" marker-end="url(#arr)"/>
+            <line x1="228" y1="219" x2="169" y2="208" stroke="#888" stroke-width="1"/>
+            <text x="230" y="216" font-family="sans-serif" font-size="11.5" fill="#333">⑤ 生豆（×2粒）</text>
+            <!-- 凡例 -->
+            <g font-family="sans-serif" font-size="10" fill="#555">
+              <circle cx="22" cy="296" r="5" fill="#C0392B"/><text x="30" y="300">果皮</text>
+              <circle cx="68" cy="296" r="5" fill="#E67E22"/><text x="76" y="300">果肉</text>
+              <circle cx="116" cy="296" r="5" fill="#D4AC0D"/><text x="124" y="300">パーチメント</text>
+              <circle cx="196" cy="296" r="5" fill="#C9A96E"/><text x="204" y="300">シルバースキン</text>
+              <circle cx="294" cy="296" r="5" fill="#2ECC71"/><text x="302" y="300">生豆</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- テキスト説明 -->
+        <div style="display:flex;flex-direction:column;justify-content:center;font-size:12px;color:var(--t2);line-height:1.8">
+          <div style="margin-bottom:16px">
+            <b style="color:var(--brown);font-size:13px">🍒 コーヒーチェリーの構造</b><br>
+            コーヒーの種子はチェリー（さくらんぼ）のような果実の中に隠れています。この果実の各層を取り除く工程が「精製」です。
+          </div>
+          <div style="margin-bottom:12px">
+            <b style="color:#E74C3C">▪ 果皮（外皮）</b><br>最も外側の硬い皮。赤〜紫色。
+          </div>
+          <div style="margin-bottom:12px">
+            <b style="color:#F39C12">▪ 果肉（ムシラージ）</b><br>甘い粘液質。アミノ酸と糖分が豊富。精製方法によってここをどれだけ残すかが風味を大きく左右します。
+          </div>
+          <div style="margin-bottom:12px">
+            <b style="color:#DAA520">▪ パーチメント</b><br>生豆を包む薄い膜。水分を保ち、熟成を促進。保管中の防湿効果も。
+          </div>
+          <div style="margin-bottom:12px">
+            <b style="color:#D2B48C">▪ シルバースキン</b><br>生豆表面の薄皮。焙煎中に剥がれ落ちます。コーヒー豆をかじると歯に挟まるあの層です。
+          </div>
+          <div>
+            <b style="color:#90EE90">▪ 生豆（グリーンビーン）</b><br>焙煎前の豆。この状態では青臭く飲めない味です。焙煎により複雑な風味が生まれます。
+          </div>
+        </div>
+      </div>
+
+      <!-- 精製方法と層の関係 -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:28px">
+        <p style="font-size:13px;color:var(--brown);margin-bottom:14px"><b>精製方法による層の除去プロセス</b></p>
+        <div style="display:grid;gap:12px">
+          <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start;padding:10px;background:var(--s3);border-radius:6px">
+            <b style="color:var(--br2);font-size:12px">ウォッシュド</b>
+            <span style="font-size:11px;color:var(--t2)">
+              <b>除去：</b> 果皮→果肉→パーチメント（機械で）→シルバースキン（焙煎時）<br>
+              <b>特徴：</b> 層をしっかり除去するため、クリーンでフルーティー。産地の酸味が素直に出ます。
+            </span>
+          </div>
+          <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start;padding:10px;background:var(--s3);border-radius:6px">
+            <b style="color:var(--br2);font-size:12px">ナチュラル</b>
+            <span style="font-size:11px;color:var(--t2)">
+              <b>除去：</b> 果皮は残す→果肉も残す→丸ごと乾燥→脱穀でベリーとともに除去<br>
+              <b>特徴：</b> 果肉の糖分が豆に浸透。強烈なベリー感・甘み・発酵フレーバーが生まれます。
+            </span>
+          </div>
+          <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start;padding:10px;background:var(--s3);border-radius:6px">
+            <b style="color:var(--br2);font-size:12px">ハニー</b>
+            <span style="font-size:11px;color:var(--t2)">
+              <b>除去：</b> 果皮を除去→果肉の粘液質を40～90%残す→乾燥（粘液質がカラメル化）<br>
+              <b>特徴：</b> 残した粘液質量で Yellow / Red / Black に分類。甘みとクリーン感のバランスが秀逸。
+            </span>
+          </div>
+          <div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start;padding:10px;background:var(--s3);border-radius:6px">
+            <b style="color:var(--br2);font-size:12px">スマトラ式</b>
+            <span style="font-size:11px;color:var(--t2)">
+              <b>除去：</b> 果皮→部分的に果肉除去→生乾きで脱穀→再乾燥<br>
+              <b>特徴：</b> 生乾きで脱穀するため、水分が逃げきらず独特のアーシー・ハーバルな風味。低酸・重厚。
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 焙煎による変化 -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px">
+        <p style="font-size:13px;color:var(--brown);margin-bottom:14px"><b>焙煎による変化</b></p>
+        <p style="font-size:12px;color:var(--t2);line-height:1.8">
+          生豆（青緑色）から焙煎を始めると、まずシルバースキンが剥がれ落ちます。<br>
+          焙煎が進むにつれて豆は膨張し、豆内部の化学変化により数百種類の香気成分が生成されます。<br>
+          <b>浅煎り：</b> 産地の特性・酸味が強調される<br>
+          <b>中煎り：</b> バランスの取れた酸味と甘み・コク<br>
+          <b>深煎り：</b> 苦味・チョコ・スモーク感が強調。精製方法の個性は薄れ、焙煎の個性が支配的になります。
+        </p>
+      </div>
+    </div><!-- /fp-bean -->
+
+    <!-- ══ WORLD MAP ══ -->
+    <div id="fp-map" class="fs-page">
+      <p class="fs-page-h">世界地図で見るコーヒー産地</p>
+      <p class="fs-page-sub">地域タブを選択。強調ドットまたはカードをクリックで産地詳細へ。</p>
+
+      <!-- Sub-tab navigation -->
+      <div class="map-tab-nav">
+        <button class="map-stab active" data-r="africa"  onclick="switchMapTab(this,'africa')">🌍 アフリカ<small>16ヶ国</small></button>
+        <button class="map-stab" data-r="asia"    onclick="switchMapTab(this,'asia')">🌏 アジア・太平洋<small>19ヶ国</small></button>
+        <button class="map-stab" data-r="south"   onclick="switchMapTab(this,'south')">🌎 南米<small>6ヶ国</small></button>
+        <button class="map-stab" data-r="central" onclick="switchMapTab(this,'central')">🌎 中米・カリブ<small>14ヶ国</small></button>
+      </div>
+
+      <!-- 凡例 -->
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin:0 0 8px;font-family:sans-serif;font-size:11px">
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#E74C3C;margin-right:4px;vertical-align:middle"></span>アフリカ</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#3498DB;margin-right:4px;vertical-align:middle"></span>アジア・太平洋</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#27AE60;margin-right:4px;vertical-align:middle"></span>南米</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#F39C12;margin-right:4px;vertical-align:middle"></span>中米・カリブ</span>
+        <span style="color:var(--t3)">大ドット＝選択地域 ／ カーソルで国名表示 ／ クリックで詳細</span>
+      </div>
+
+      <!-- 共通ワールドマップ（全タブで共有・ズームなし） -->
+      <div style="position:relative;max-width:1200px;height:0;padding-bottom:28.41%;margin:0 0 16px;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.15);background:#C8DDE8">
+        <img src="./wmap.jpg"
+             alt="世界地図" style="position:absolute;width:109.09%;left:-2.27%;top:-82%;display:block">
+        <svg id="mapMainSvg" class="map-svg-region" viewBox="20 205 880 250"
+             preserveAspectRatio="none"
+             style="position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair">
+          <defs>
+            <filter id="dotShadow" x="-60%" y="-60%" width="220%" height="220%">
+              <feDropShadow dx="0" dy="0.6" stdDeviation="1" flood-color="#000" flood-opacity="0.55"/>
+            </filter>
+          </defs>
+          <rect x="0" y="245" width="960" height="189" fill="rgba(255,215,0,0.06)"/>
+          <line x1="0" y1="340" x2="960" y2="340" stroke="rgba(80,140,80,0.4)" stroke-width="0.7"/>
+          <!-- Africa active -->
+          <g id="mapG-africa" fill="#E74C3C" stroke="rgba(255,255,255,.7)" stroke-width="0.8" opacity="1" filter="url(#dotShadow)">
+            <circle cx="156" cy="305" r="5" data-cn="エチオピア"/>
+            <circle cx="152" cy="336" r="5" data-cn="ケニア"/>
+            <circle cx="147" cy="362" r="5" data-cn="タンザニア"/>
+            <circle cx="133" cy="347" r="5" data-cn="ルワンダ"/>
+            <circle cx="139" cy="336" r="5" data-cn="ウガンダ"/>
+            <circle cx="133" cy="351" r="5" data-cn="ブルンジ"/>
+            <circle cx="117" cy="340" r="5" data-cn="コンゴ民主共和国"/>
+            <circle cx="85"  cy="321" r="5" data-cn="カメルーン"/>
+            <circle cx="133" cy="415" r="5" data-cn="ジンバブエ"/>
+            <circle cx="144" cy="388" r="5" data-cn="マラウイ"/>
+            <circle cx="128" cy="392" r="5" data-cn="ザンビア"/>
+            <circle cx="179" cy="415" r="5" data-cn="マダガスカル"/>
+            <circle cx="101" cy="381" r="5" data-cn="アンゴラ"/>
+            <circle cx="147" cy="407" r="5" data-cn="モザンビーク"/>
+            <circle cx="75"  cy="305" r="5" data-cn="ナイジェリア"/>
+            <circle cx="40"  cy="313" r="5" data-cn="コートジボワール"/>
+          </g>
+          <!-- Asia / Pacific -->
+          <g id="mapG-asia" fill="#2980B9" stroke="none" opacity="0.2">
+            <circle cx="368" cy="340" r="2.5" data-cn="インドネシア"/>
+            <circle cx="341" cy="279" r="2.5" data-cn="ベトナム"/>
+            <circle cx="267" cy="264" r="2.5" data-cn="インド"/>
+            <circle cx="181" cy="279" r="2.5" data-cn="イエメン"/>
+            <circle cx="445" cy="362" r="2.5" data-cn="パプアニューギニア"/>
+            <circle cx="379" cy="290" r="2.5" data-cn="フィリピン"/>
+            <circle cx="309" cy="264" r="2.5" data-cn="ミャンマー"/>
+            <circle cx="320" cy="283" r="2.5" data-cn="タイ"/>
+            <circle cx="328" cy="272" r="2.5" data-cn="ラオス"/>
+            <circle cx="325" cy="249" r="2.5" data-cn="中国（雲南省）"/>
+            <circle cx="389" cy="373" r="2.5" data-cn="東ティモール"/>
+            <circle cx="277" cy="234" r="2.5" data-cn="ネパール"/>
+            <circle cx="352" cy="324" r="2.5" data-cn="マレーシア"/>
+            <circle cx="413" cy="434" r="2.5" data-cn="オーストラリア"/>
+            <circle cx="483" cy="369" r="2.5" data-cn="ソロモン諸島"/>
+            <circle cx="333" cy="294" r="2.5" data-cn="カンボジア"/>
+            <circle cx="499" cy="400" r="2.5" data-cn="バヌアツ"/>
+            <circle cx="269" cy="309" r="2.5" data-cn="スリランカ"/>
+            <circle cx="493" cy="419" r="2.5" data-cn="ニューカレドニア"/>
+          </g>
+          <!-- South America -->
+          <g id="mapG-south" fill="#27AE60" stroke="none" opacity="0.2">
+            <circle cx="872" cy="377" r="2.5" data-cn="ブラジル"/>
+            <circle cx="816" cy="324" r="2.5" data-cn="コロンビア"/>
+            <circle cx="811" cy="377" r="2.5" data-cn="ペルー"/>
+            <circle cx="840" cy="403" r="2.5" data-cn="ボリビア"/>
+            <circle cx="805" cy="347" r="2.5" data-cn="エクアドル"/>
+            <circle cx="837" cy="309" r="2.5" data-cn="ベネズエラ"/>
+          </g>
+          <!-- Central / Caribbean -->
+          <g id="mapG-central" fill="#E67E22" stroke="none" opacity="0.2">
+            <circle cx="739" cy="253" r="2.5" data-cn="メキシコ"/>
+            <circle cx="772" cy="283" r="2.5" data-cn="グアテマラ"/>
+            <circle cx="781" cy="283" r="2.5" data-cn="ホンジュラス"/>
+            <circle cx="776" cy="287" r="2.5" data-cn="エルサルバドル"/>
+            <circle cx="787" cy="290" r="2.5" data-cn="ニカラグア"/>
+            <circle cx="789" cy="302" r="2.5" data-cn="コスタリカ"/>
+            <circle cx="800" cy="305" r="2.5" data-cn="パナマ"/>
+            <circle cx="803" cy="256" r="2.5" data-cn="キューバ"/>
+            <circle cx="808" cy="272" r="2.5" data-cn="ジャマイカ"/>
+            <circle cx="819" cy="268" r="2.5" data-cn="ハイチ"/>
+            <circle cx="827" cy="268" r="2.5" data-cn="ドミニカ共和国"/>
+            <circle cx="835" cy="272" r="2.5" data-cn="プエルトリコ"/>
+            <circle cx="851" cy="298" r="2.5" data-cn="トリニダード・トバゴ"/>
+            <circle cx="592" cy="264" r="2.5" data-cn="ハワイ（米国）"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- 地域別カード＋説明（タブ切り替えで表示） -->
+
+      <!-- AFRICA -->
+      <div id="mstab-africa" class="map-stab-content">
+        <div class="map-country-grid">
+          <div class="mcc" onclick="closeFS();selectOrigin('ethiopia')">🇪🇹 エチオピア<span>ブルーベリー・フローラル・シトラス</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('kenya')">🇰🇪 ケニア<span>ブラックカラント・ワイン・グレープフルーツ</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('tanzania')">🇹🇿 タンザニア<span>プラム・チョコ・ワイン</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('rwanda')">🇷🇼 ルワンダ<span>フルーティー・フローラル・ジューシー</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('uganda')">🇺🇬 ウガンダ<span>アーシー・チョコ・フルーティー</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('burundi')">🇧🇮 ブルンジ<span>ピーチ・フローラル・甘み</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('drc')">🇨🇩 コンゴ民主共和国<span>フルーティー・ハーブ・チョコ</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('cameroon')">🇨🇲 カメルーン<span>ナッツ・チョコ・マイルド</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('nigeria')">🇳🇬 ナイジェリア<span>アーシー・ロブスタ系・ウッディ</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('ivory-coast')">🇨🇮 コートジボワール<span>ロブスタ・チョコ・苦み</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('angola')">🇦🇴 アンゴラ<span>ロブスタ系・苦み・スモーク</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('zambia')">🇿🇲 ザンビア<span>シトラス・チョコ・マイルド</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('malawi')">🇲🇼 マラウイ<span>マイルド・ナッツ・クリーン</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('zimbabwe')">🇿🇼 ジンバブエ<span>アーシー・チョコ・マイルド</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('mozambique')">🇲🇿 モザンビーク<span>フルーティー・クリーン・甘み</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('madagascar')">🇲🇬 マダガスカル<span>フルーティー・スパイシー・ユニーク</span></div>
+        </div>
+        <p class="map-region-desc">コーヒー発祥の地。エチオピアは800種以上の在来種が自生し、精製方法により全く異なる表情を見せる。ケニア・ルワンダはスペシャルティの最高峰。高標高栽培による明るい酸味と複雑な風味が特徴。</p>
+      </div>
+
+      <!-- ASIA -->
+      <div id="mstab-asia" class="map-stab-content" style="display:none">
+        <div class="map-country-grid">
+          <div class="mcc" onclick="closeFS();selectOrigin('indonesia')">🇮🇩 インドネシア<span>アーシー・スパイシー・チョコ</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('vietnam')">🇻🇳 ベトナム<span>ロブスタ・苦み・ナッツ</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('india')">🇮🇳 インド<span>スパイシー・チョコ・ロブスタ系</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('yemen')">🇾🇪 イエメン<span>ワイニー・スパイシー・チョコ</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('png')">🇵🇬 パプアニューギニア<span>フルーティー・チョコ・アーシー</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('philippines')">🇵🇭 フィリピン<span>マイルド・チョコ・アーシー</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('myanmar')">🇲🇲 ミャンマー<span>フルーティー・スパイシー・チョコ</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('thailand')">🇹🇭 タイ<span>マイルド・チョコ・ナッツ</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('laos')">🇱🇦 ラオス<span>フルーティー・マイルド・チョコ</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('china')">🇨🇳 中国（雲南省）<span>フローラル・フルーティー・甘み</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('timor')">🇹🇱 東ティモール<span>アーシー・チョコ・マイルド</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('nepal')">🇳🇵 ネパール<span>フローラル・フルーティー・クリーン</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('sri-lanka')">🇱🇰 スリランカ<span>マイルド・スパイシー・チョコ</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('malaysia')">🇲🇾 マレーシア<span>アーシー・スパイシー・チョコ</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('australia')">🇦🇺 オーストラリア<span>マイルド・ナッツ・甘み</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('solomon')">🇸🇧 ソロモン諸島<span>フルーティー・クリーン・甘み</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('cambodia')">🇰🇭 カンボジア<span>チョコ・マイルド・アーシー</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('vanuatu')">🇻🇺 バヌアツ<span>フルーティー・クリーン</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('new-caledonia')">🇳🇨 ニューカレドニア<span>マイルド・クリーン・フルーティー</span></div>
+        </div>
+        <p class="map-region-desc">インドネシアはスマトラ式精製で独特のアーシー・ボディが特徴、ロブスタ生産量世界2位。ベトナムはロブスタ世界1位。中国雲南省・ミャンマー・ラオスは新興スペシャルティ産地として急成長中。イエメンはコーヒー文化発祥の地。</p>
+      </div>
+
+      <!-- SOUTH AMERICA -->
+      <div id="mstab-south" class="map-stab-content" style="display:none">
+        <div class="map-country-grid">
+          <div class="mcc" onclick="closeFS();selectOrigin('brazil')">🇧🇷 ブラジル<span>チョコ・ナッツ・キャラメル</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('colombia')">🇨🇴 コロンビア<span>キャラメル・フルーティー・バランス</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('peru')">🇵🇪 ペルー<span>マイルド・チョコ・ナッツ</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('bolivia')">🇧🇴 ボリビア<span>フルーティー・甘み・ユニーク</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('ecuador')">🇪🇨 エクアドル<span>フローラル・フルーティー・甘み</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('venezuela')">🇻🇪 ベネズエラ<span>チョコ・ナッツ・マイルド</span></div>
+        </div>
+        <p class="map-region-desc">ブラジルが世界最大の生産量（全世界の約40%）。ナチュラル精製が主流でチョコ・ナッツの豊かな風味。コロンビアはウォッシュドで明るいフルーティーな酸味。高標高のボリビア・エクアドルは希少なスペシャルティとして注目。</p>
+      </div>
+
+      <!-- CENTRAL AMERICA / CARIBBEAN -->
+      <div id="mstab-central" class="map-stab-content" style="display:none">
+        <div class="map-country-grid">
+          <div class="mcc" onclick="closeFS();selectOrigin('guatemala')">🇬🇹 グアテマラ<span>チョコ・スパイシー・フルーティー</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('mexico')">🇲🇽 メキシコ<span>チョコ・ナッツ・マイルド</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('honduras')">🇭🇳 ホンジュラス<span>フルーティー・甘み・バランス</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('el-salvador')">🇸🇻 エルサルバドル<span>キャラメル・チョコ・甘み</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('costa-rica')">🇨🇷 コスタリカ<span>クリーン・フルーティー・甘み</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('panama')">🇵🇦 パナマ<span>フローラル・フルーティー（ゲイシャ）</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('nicaragua')">🇳🇮 ニカラグア<span>チョコ・ナッツ・マイルド</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('cuba')">🇨🇺 キューバ<span>マイルド・チョコ・バランス</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('jamaica')">🇯🇲 ジャマイカ<span>マイルド・クリーン（ブルーマウンテン）</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('haiti')">🇭🇹 ハイチ<span>マイルド・チョコ・バランス</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('dominican')">🇩🇴 ドミニカ共和国<span>マイルド・フルーティー・甘み</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('hawaii')">🌺 ハワイ（米国）<span>マイルド・チョコ・ナッツ（コナ）</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('puerto-rico')">🇵🇷 プエルトリコ<span>マイルド・甘み・バランス</span></div>
+          <div class="mcc" onclick="closeFS();selectOrigin('trinidad')">🇹🇹 トリニダード・トバゴ<span>フルーティー・マイルド・甘み</span></div>
+        </div>
+        <p class="map-region-desc">高標高栽培によるフルーティーで明るい酸味が特徴。コスタリカ・パナマはスペシャルティの最高峰。パナマのゲイシャは世界最高値のコーヒーとして知られる。ジャマイカのブルーマウンテンは希少なプレミアム品種。</p>
+      </div>
+
+    </div><!-- /fp-map -->
+
+  </div><!-- /fs-body -->
+</div><!-- /fs-ov -->
+
+
+<script>
+/* ── FIREBASE REST (みんなの評価) ── */
+const _DB='https://coffee-journal-73f26-default-rtdb.asia-southeast1.firebasedatabase.app';
+let _uid=localStorage.getItem('cj_uid');
+if(!_uid){_uid='u'+Date.now()+Math.random().toString(36).slice(2,7);localStorage.setItem('cj_uid',_uid);}
+function _syncRat(id,v){
+  const url=`${_DB}/ratings/${id}/${_uid}.json`;
+  if(v>0) fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:String(v)}).catch(()=>{});
+  else     fetch(url,{method:'DELETE'}).catch(()=>{});
+}
+function _loadCommRat(id,cb){
+  fetch(`${_DB}/ratings/${id}.json`)
+    .then(r=>r.json())
+    .then(d=>{
+      if(!d){cb(0,0);return;}
+      const vals=Object.values(d).filter(v=>Number.isInteger(v)&&v>=1&&v<=5);
+      cb(vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0,vals.length);
+    }).catch(()=>cb(0,0));
+}
+
+const origins=[
+// ───── AFRICA ─────
+{id:"ethiopia",name:"エチオピア",en:"Ethiopia",flag:"🇪🇹",cont:"africa",
+ region:"Yirgacheffe / Sidama / Harrar / Jimma",
+ flavors:["ブルーベリー","ジャスミン","シトラス","フローラル","紅茶"],
+ desc:"コーヒー発祥の地。ナチュラル精製による鮮烈な果実感と、ウォッシュドの透明感ある酸味が世界的に高評価。イルガチェフェは「最高峰のアラビカ」と称され、精製方法によって全く異なる表情を見せる。",
+ trivia:"「コーヒー」の語源はエチオピアの地名「カッファ（Kaffa）」に由来するという説が有力。全土に800種以上の在来種（エアルーム）が自生し、コーヒーの遺伝的多様性の宝庫。",
+ p:{a:9,s:7,b:5,bi:3,ar:10},alt:1800,altStr:"1,500〜2,200m",
+ process:"ナチュラル / ウォッシュド",varieties:"エアルーム（800種以上の在来種）",
+ harvest:"10月〜1月",prod:"約45万トン/年（世界5位）",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"低温88〜90℃でゆっくり注ぐとフローラルな香りが際立つ。ナチュラルは中粗挽き推奨。"},
+
+{id:"kenya",name:"ケニア",en:"Kenya",flag:"🇰🇪",cont:"africa",
+ region:"Nyeri / Kirinyaga / Embu / Murang'a",
+ flavors:["ブラックカラント","グレープフルーツ","トマト","ワイン","フルーツポンチ"],
+ desc:"独特の「ケニア酸」と呼ばれる強烈な果実酸が特徴。SL28・SL34品種の果実感は世界中のスペシャルティ愛好家を魅了する。ダブルウォッシュドで非常にクリーンな仕上がり。",
+ trivia:"ケニアはAA・AB・Cなどスクリーンサイズで格付けを行うアフリカ唯一の国。コーヒー農家の収益向上を目的としたファクトリー（ウェットミル）制度が整備されている。",
+ p:{a:10,s:6,b:7,bi:4,ar:8},alt:1700,altStr:"1,400〜2,200m",
+ process:"ダブルウォッシュド",varieties:"SL28 / SL34 / Ruiru11 / Batian",
+ harvest:"10月〜12月 / 6月〜8月（サブ）",prod:"約5万トン/年",
+ brew:["ハンドドリップ","ケメックス","エアロプレス"],
+ tips:"93〜95℃高めの温度で抽出すると酸甘バランスが出る。浅煎り強くおすすめ。"},
+
+{id:"tanzania",name:"タンザニア",en:"Tanzania",flag:"🇹🇿",cont:"africa",
+ region:"Kilimanjaro / Mbeya / Arusha / Kigoma",
+ flavors:["ブラックカラント","シトラス","ワイン","フルーティー"],
+ desc:"アフリカ最高峰キリマンジャロの麓で育つ豆が有名。ケニアに似た明るい酸味と果実感があるが、ボディは少し軽め。ピーベリー（丸豆）が名物で均一に焼けると言われる。",
+ trivia:"ピーベリーとはコーヒーチェリーの中に通常2粒入る種が1粒だけ育ったもの。全収穫量の約10%程度しかなく希少。均一に焼けるため品質が高いとされる。",
+ p:{a:8,s:6,b:6,bi:5,ar:7},alt:1500,altStr:"1,200〜1,800m",
+ process:"ウォッシュド",varieties:"Bourbon / Kent / N39",
+ harvest:"10月〜2月",prod:"約6万トン/年",
+ brew:["ハンドドリップ","ケメックス"],
+ tips:"ピーベリーは中煎りでフルーティーな酸味を楽しめる。ケニアが好きなら要チェック。"},
+
+{id:"rwanda",name:"ルワンダ",en:"Rwanda",flag:"🇷🇼",cont:"africa",
+ region:"Nyamasheke / Rubavu / Gakenke / Nyanza",
+ flavors:["ベリー","フラワー","アプリコット","スパイス","ジューシー"],
+ desc:"「千の丘の国」の高地栽培。COEで上位入賞する高品質豆が続出するアフリカ注目の産地。ブルボン品種が多く、フルーティーで複雑な風味。エチオピア好きに強くおすすめ。",
+ trivia:"ルワンダのコーヒー産業は1994年のジェノサイドから復興した象徴。女性コーヒー農家の自立を促す協同組合も多く、購入が直接支援になる。COEは2012年から開催。",
+ p:{a:8,s:8,b:6,bi:3,ar:8},alt:1800,altStr:"1,500〜2,100m",
+ process:"ウォッシュド / ナチュラル",varieties:"Bourbon（在来種）",
+ harvest:"3月〜7月",prod:"約3万トン/年",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"浅煎りで果実感が爆発する。エチオピアと飲み比べると面白い。"},
+
+{id:"uganda",name:"ウガンダ",en:"Uganda",flag:"🇺🇬",cont:"africa",
+ region:"Mt.Elgon / Sipi Falls / Bugisu",
+ flavors:["ブラックベリー","チョコ","アース","スパイス"],
+ desc:"主にロブスタ種を生産するが、Mt.エルゴン山麓のブギス地区で採れるアラビカは果実感と甘みを持つ。アジア向け輸出が多く日本市場での知名度はまだ低い新興産地。",
+ trivia:"ウガンダはロブスタ種の原産地でもある。ナイル川の源流ヴィクトリア湖の北に位置し、豊富な降水量がコーヒー栽培を支える。Mt.エルゴンは標高4,321m。",
+ p:{a:6,s:5,b:8,bi:7,ar:6},alt:1400,altStr:"1,200〜2,100m",
+ process:"ウォッシュド / ナチュラル",varieties:"SL14 / SL28 / Robusta",
+ harvest:"10月〜2月",prod:"約58万トン/年（ロブスタ含む）",
+ brew:["フレンチプレス","エスプレッソ"],
+ tips:"Mt.エルゴン産アラビカは浅〜中煎りでフルーティーに。"},
+
+{id:"burundi",name:"ブルンジ",en:"Burundi",flag:"🇧🇮",cont:"africa",
+ region:"Kayanza / Ngozi / Kirundo",
+ flavors:["ストロベリー","ピーチ","フラワー","クリーン"],
+ desc:"ルワンダと隣接するアフリカの内陸国。高地栽培のブルボン種からなる明るい酸味と豊かな果実感。近年スペシャルティとして急速に注目度が上昇している。",
+ trivia:"ブルンジのコーヒーは長年政府の管理下に置かれていたが、2000年代から民営化が進み品質が急向上。COEは2012年から開催されている。",
+ p:{a:8,s:7,b:6,bi:4,ar:7},alt:1700,altStr:"1,400〜2,000m",
+ process:"ウォッシュド",varieties:"Bourbon",
+ harvest:"3月〜6月",prod:"約2万トン/年",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"ルワンダと産地比較すると違いが分かって面白い。どちらも高品質アフリカ高地ブルボン。"},
+
+{id:"drc",name:"コンゴ民主共和国",en:"DR Congo",flag:"🇨🇩",cont:"africa",
+ region:"Kivu / North Kivu / South Kivu",
+ flavors:["フラワー","シトラス","ハーブ","クリーン"],
+ desc:"内戦が続く不安定な地域ながら、キブ湖周辺の高地では質の高いアラビカが栽培される。豊かな熱帯雨林と火山性土壌が独特のフローラルな風味を生む。",
+ trivia:"キブ湖は標高1,460mに位置する高山湖。農民協同組合が女性の経済的自立を支援している。希少性が高くネットや専門店でしか手に入らない。",
+ p:{a:7,s:6,b:7,bi:5,ar:8},alt:1600,altStr:"1,300〜2,000m",
+ process:"ウォッシュド",varieties:"Bourbon / Typica",
+ harvest:"9月〜1月",prod:"スペシャルティは少量",
+ brew:["ハンドドリップ","ケメックス"],
+ tips:"見つけたら試す価値大。フローラルでクリーンな希少産地。"},
+
+{id:"cameroon",name:"カメルーン",en:"Cameroon",flag:"🇨🇲",cont:"africa",
+ region:"Bafoussam / Bamenda / Mt.Cameroon",
+ flavors:["アース","チョコ","ナッツ","スモーク"],
+ desc:"アフリカ西部の産地。Mt.カメルーン（4,095m）の火山地帯で採れるアラビカはミネラル感がある。ロブスタとアラビカの両方を生産する。「アフリカの縮図」と呼ばれる多様な生態系を持つ。",
+ trivia:"植民地時代にドイツが持ち込んだコーヒー栽培が現在も続く。ドイツ→フランス・イギリスと支配者が変わるなかでもコーヒー文化は受け継がれてきた。",
+ p:{a:4,s:5,b:8,bi:7,ar:6},alt:1200,altStr:"800〜2,000m",
+ process:"ウォッシュド / ナチュラル",varieties:"Java / Mundo Novo / Robusta",
+ harvest:"11月〜3月",prod:"約3万トン/年",
+ brew:["フレンチプレス","モカポット"],
+ tips:"深煎りにするとチョコとスモークのコクが際立つ。"},
+
+{id:"zimbabwe",name:"ジンバブエ",en:"Zimbabwe",flag:"🇿🇼",cont:"africa",
+ region:"Chipinge / Honde Valley",
+ flavors:["フルーティー","クリーン","ほどよい酸","ナッツ"],
+ desc:"かつてはアフリカ屈指の高品質産地として名声を誇ったが、政情不安により生産量が激減。現在も少量ながら高品質なアラビカが栽培されており品質復活に期待がかかる。",
+ trivia:"1980〜90年代のジンバブエコーヒーはケニアに匹敵するとも言われた。エースター農園など歴史ある農園が品質復活を目指して取り組んでいる。",
+ p:{a:6,s:6,b:6,bi:5,ar:6},alt:1400,altStr:"1,100〜1,800m",
+ process:"ウォッシュド",varieties:"Bourbon / Catuai / Catimor",
+ harvest:"5月〜9月",prod:"非常に少量（希少）",
+ brew:["ハンドドリップ"],
+ tips:"見つけたらぜひ試したい希少産地。クリーンで飲みやすい。"},
+
+{id:"malawi",name:"マラウイ",en:"Malawi",flag:"🇲🇼",cont:"africa",
+ region:"Thyolo / Mulanje / Mzuzu",
+ flavors:["フルーティー","マイルド","シトラス","クリーン"],
+ desc:"「アフリカの暖かい心」と呼ばれる国。マラウイ湖周辺の高地で栽培されるアラビカは果実感があり飲みやすい。フェアトレード認証農園が多く購入が農家支援に直結する。",
+ trivia:"マラウイのコーヒーは主にミズズ協同組合が管理し小農家を支援している。生産量は少ないが質の高いウォッシュドが欧州市場で評価されている。",
+ p:{a:6,s:6,b:6,bi:4,ar:6},alt:1300,altStr:"900〜1,800m",
+ process:"ウォッシュド",varieties:"Geisha / Catimor / Bourbon",
+ harvest:"5月〜9月",prod:"約1万トン/年",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"爽やかな飲み口で日常使いに最適。フェアトレード品を選ぶと農家支援にもなる。"},
+
+{id:"zambia",name:"ザンビア",en:"Zambia",flag:"🇿🇲",cont:"africa",
+ region:"Kasama / Isoka / Muchinga",
+ flavors:["クリーン","フルーティー","ほどよい酸","スイート"],
+ desc:"アフリカ南部の高地産地。ムチンガ高原の酸性土壌と冷涼な気候が高品質アラビカ栽培を可能にする。生産量は少ないが品質向上が著しいアフリカ南部の新星。",
+ trivia:"ザンビアのコーヒー産業は1950〜60年代にイギリス人農園主によって確立。現在は地元農家への権限移譲が進んでいる。ジンバブエ・マラウイとの産地比較も面白い。",
+ p:{a:7,s:6,b:5,bi:4,ar:6},alt:1400,altStr:"1,100〜1,800m",
+ process:"ウォッシュド",varieties:"Bourbon / Typica / Catuai",
+ harvest:"4月〜8月",prod:"約1万トン/年",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"クリーンでフルーティー。アフリカ南部産地を開拓したい方に。"},
+
+// ───── SOUTH AMERICA ─────
+{id:"brazil",name:"ブラジル",en:"Brazil",flag:"🇧🇷",cont:"south",
+ region:"Cerrado / Sul de Minas / Mogiana / Bahia",
+ flavors:["チョコレート","ナッツ","キャラメル","バニラ","ローストアーモンド"],
+ desc:"世界最大の生産国で全体の約30〜40%を占める。低酸味でコクがあり、エスプレッソブレンドのベースに多用される。ナチュラル精製が多く甘みが豊か。1908年からの日本人移民がコーヒー産業を支えた歴史がある。",
+ trivia:"ブラジルは世界で唯一、コーヒーの輸出先として日本が歴史的に最大の市場だった時期がある。かつて「コーヒーと大統領」と呼ばれるほど政治経済にコーヒーが絡んでいた。",
+ p:{a:3,s:8,b:8,bi:6,ar:6},alt:1000,altStr:"800〜1,300m",
+ process:"ナチュラル / パルプドナチュラル",varieties:"Mundo Novo / Catuai / Bourbon",
+ harvest:"5月〜9月",prod:"約350万トン/年（世界1位）",
+ brew:["エスプレッソ","フレンチプレス","水出し","モカポット"],
+ tips:"深煎りでビターチョコ。中煎りでナッツとキャラメル。ブレンドベースに最適。"},
+
+{id:"colombia",name:"コロンビア",en:"Colombia",flag:"🇨🇴",cont:"south",
+ region:"Huila / Nariño / Antioquia / Cauca",
+ flavors:["キャラメル","オレンジ","アプリコット","マイルド","ハーブ"],
+ desc:"均整のとれた味わいで世界中に愛される定番産地。ウォッシュド精製が主流でクリーンカップ。高地栽培で酸味と甘みのバランスが抜群。スペシャルティコーヒーの入門として最適。",
+ trivia:"フアン・バルデスのキャラクターとロゴは1959年に考案されたコロンビアコーヒー連盟のブランドで、世界で最も認知されたコーヒーアイコンの一つ。",
+ p:{a:7,s:8,b:6,bi:4,ar:7},alt:1600,altStr:"1,200〜2,000m",
+ process:"ウォッシュド",varieties:"Castillo / Colombia / Typica / Bourbon",
+ harvest:"10月〜2月 / 4月〜6月（サブ）",prod:"約85万トン/年（世界3位）",
+ brew:["ハンドドリップ","サイフォン","エスプレッソ"],
+ tips:"93℃中細挽きが定番。安定した品質なのでドリップ練習にも向く。"},
+
+{id:"peru",name:"ペルー",en:"Peru",flag:"🇵🇪",cont:"south",
+ region:"Cajamarca / San Martín / Junín / Cusco",
+ flavors:["チョコレート","ナッツ","フルーティー","クリーン","マイルド"],
+ desc:"アンデス山脈の高地で栽培される高品質アラビカ。有機栽培とフェアトレードが盛んで小規模農家の協同組合が多い。近年スペシャルティとして注目度が急上昇している。",
+ trivia:"ペルーはオーガニック認証コーヒーの輸出量で世界トップクラス。インカ帝国の遺跡が残るクスコ周辺でも栽培され、観光との掛け合わせが注目されている。",
+ p:{a:6,s:7,b:6,bi:4,ar:6},alt:1700,altStr:"1,200〜2,100m",
+ process:"ウォッシュド",varieties:"Caturra / Typica / Bourbon",
+ harvest:"7月〜9月",prod:"約30万トン/年",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"オーガニック認証品が多く安心。コスパが良くデイリー向け。"},
+
+{id:"bolivia",name:"ボリビア",en:"Bolivia",flag:"🇧🇴",cont:"south",
+ region:"Caranavi / Coroico / Yungas",
+ flavors:["フルーティー","フラワー","クリーン","明るい酸","ハニー"],
+ desc:"世界でも有数の超高地産地。ユンガス地区（標高1,800〜2,300m）で栽培されるアラビカは明るい酸味と花のような香りが特徴。生産量が少なく希少なスペシャルティ。",
+ trivia:"ボリビアはかつてコカの葉の生産で知られたが、代替作物としてコーヒー栽培がNGOによって推進されている。超高地栽培のポテンシャルに世界が注目している。",
+ p:{a:8,s:7,b:5,bi:3,ar:7},alt:2000,altStr:"1,500〜2,300m",
+ process:"ウォッシュド",varieties:"Typica / Caturra / Catuai",
+ harvest:"6月〜9月",prod:"非常に少量（希少）",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"超高地産の透明感ある酸味を浅煎りで。希少品なので見つけたら即購入を。"},
+
+{id:"ecuador",name:"エクアドル",en:"Ecuador",flag:"🇪🇨",cont:"south",
+ region:"Loja / Zamora / Pichincha / Galápagos",
+ flavors:["フルーティー","チョコ","クリーン","マイルド","フラワー"],
+ desc:"ガラパゴス諸島を含む国。赤道直下にもかかわらず高地の冷涼な気候が質の高いアラビカを生む。ガラパゴス産は農薬・化学肥料が持ち込めない島の規制から完全オーガニック。",
+ trivia:"エクアドルの「ガラパゴスコーヒー」は自然環境保護のため生産量も厳しく制限されている。島固有の生態系を守るための完全オーガニックという希少性が魅力。",
+ p:{a:6,s:6,b:6,bi:5,ar:6},alt:1400,altStr:"1,000〜2,000m",
+ process:"ウォッシュド / ナチュラル",varieties:"Typica / Caturra / Bourbon",
+ harvest:"4月〜8月",prod:"約8万トン/年",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"ガラパゴス産は完全無農薬で希少。バランスの良い飲みやすいカップ。"},
+
+// ───── CENTRAL AMERICA & CARIBBEAN ─────
+{id:"guatemala",name:"グアテマラ",en:"Guatemala",flag:"🇬🇹",cont:"central",
+ region:"Antigua / Huehuetenango / Atitlán / Cobán",
+ flavors:["ダークチョコ","スパイス","キャラメル","スモーキー","ブラウンシュガー"],
+ desc:"活火山に囲まれた土地で育つ独特のミネラル感とスパイシーさが特徴。アンティグアは火山灰地と昼夜の寒暖差がコクのある豆を育て、世界的な名産地として知られる。",
+ trivia:"グアテマラは産地ごとに「SHB（Strictly Hard Bean）」など硬度で格付けを行う。標高が高いほど豆が硬く品質が高いとされる。火山が8つある国で土壌が豊か。",
+ p:{a:6,s:7,b:8,bi:6,ar:7},alt:1500,altStr:"1,300〜2,000m",
+ process:"ウォッシュド",varieties:"Bourbon / Caturra / Catuai / Typica",
+ harvest:"12月〜3月",prod:"約22万トン/年",
+ brew:["ハンドドリップ","モカポット","エスプレッソ"],
+ tips:"中〜深煎りにするとチョコレートの風味が増す。アイスにも適している。"},
+
+{id:"mexico",name:"メキシコ",en:"Mexico",flag:"🇲🇽",cont:"central",
+ region:"Chiapas / Oaxaca / Veracruz / Puebla",
+ flavors:["ナッツ","チョコ","キャラメル","マイルド","スパイス"],
+ desc:"オルガニコ（有機栽培）とシェードグロウン（日陰栽培）が盛んで環境に優しい生産が特徴。チアパス州が最も品質が高い。マイルドで飲みやすいデイリーコーヒー。",
+ trivia:"メキシコのコーヒー農家の多くはマヤ系・サポテカ系の先住民族で、伝統的な農法を守りながら有機認証を取得している。フェアトレードの先駆け的産地として有名。",
+ p:{a:5,s:6,b:6,bi:5,ar:6},alt:1200,altStr:"900〜1,700m",
+ process:"ウォッシュド",varieties:"Bourbon / Maragogype / Typica",
+ harvest:"11月〜3月",prod:"約24万トン/年",
+ brew:["ハンドドリップ","ドリップマシン","コールドブリュー"],
+ tips:"コスパが良くデイリーコーヒーに最適。オーガニック品が豊富で選びやすい。"},
+
+{id:"honduras",name:"ホンジュラス",en:"Honduras",flag:"🇭🇳",cont:"central",
+ region:"Santa Barbara / Copán / Comayagua / Agalta",
+ flavors:["チョコ","フルーティー","キャラメル","スムーズ","フローラル"],
+ desc:"2000年代から急速に品質向上し、今やグアテマラ・コスタリカと並ぶ中米の主要スペシャルティ産地。COEで毎年高評価の豆が多数登場する注目の新興産地。",
+ trivia:"ホンジュラスは今や中央アメリカ最大のコーヒー生産国。2011年からCOEが開催され、世界のバイヤーの注目を集めるようになった。コスパの高さも魅力。",
+ p:{a:6,s:7,b:7,bi:5,ar:6},alt:1300,altStr:"1,000〜1,700m",
+ process:"ウォッシュド / ハニー",varieties:"Catuai / Caturra / Bourbon / IHCAFE90",
+ harvest:"11月〜3月",prod:"約40万トン/年（中米最大）",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"コスパが高くスペシャルティ入門に最適。産地ごとに個性が異なるので飲み比べを楽しんで。"},
+
+{id:"el-salvador",name:"エルサルバドル",en:"El Salvador",flag:"🇸🇻",cont:"central",
+ region:"Santa Ana / Apaneca-Ilamatepec / Alotepec-Metapán",
+ flavors:["チョコ","キャラメル","スウィート","マイルド","フルーツ"],
+ desc:"「ブルボンの聖地」と呼ばれるほどブルボン品種の保存率が高い中米の小国。甘みが豊かでリッチな風味。内戦の影響で品質が低下した時期もあったが現在は復活。",
+ trivia:"エルサルバドルでは「パカマラ」という地場の交配品種（Pacas×Maragogype）が世界的に評価されている。豆が非常に大きくフルーティーで複雑な風味が特徴。",
+ p:{a:6,s:8,b:7,bi:4,ar:7},alt:1200,altStr:"500〜1,500m",
+ process:"ウォッシュド / ハニー / ナチュラル",varieties:"Bourbon / Pacamara / Pacas",
+ harvest:"11月〜3月",prod:"約5万トン/年",
+ brew:["ハンドドリップ","エスプレッソ"],
+ tips:"パカマラ品種は豆が非常に大きく、フルーティーで複雑。ぜひ試してほしい。"},
+
+{id:"costa-rica",name:"コスタリカ",en:"Costa Rica",flag:"🇨🇷",cont:"central",
+ region:"Tarrazú / Tres Ríos / Naranjo / Poás",
+ flavors:["シトラス","ハニー","ピーチ","クリーン","ブライト","オレンジピール"],
+ desc:"ハニープロセスの発祥地ともいわれ、甘みと明るい酸味が特徴。クリーンカップで透明感がありスペシャルティ入門に最適。ロブスタ栽培を法律で禁止した全量アラビカの国。",
+ trivia:"コスタリカは1989年に法律でロブスタ種の栽培を禁止した世界唯一の国。全量アラビカという高い基準が品質向上につながっている。環境保護にも力を入れる。",
+ p:{a:8,s:8,b:5,bi:3,ar:7},alt:1500,altStr:"1,200〜1,900m",
+ process:"ハニー / ウォッシュド / ナチュラル",varieties:"Caturra / Catuai / Villa Sarchi",
+ harvest:"11月〜3月",prod:"約9万トン/年",
+ brew:["ハンドドリップ","エアロプレス","クレバードリッパー"],
+ tips:"ハニープロセスは中煎りで甘みが最も引き立つ。91〜93℃推奨。"},
+
+{id:"panama",name:"パナマ",en:"Panama",flag:"🇵🇦",cont:"central",
+ region:"Boquete / Volcán / Renacimiento",
+ flavors:["ジャスミン","ベルガモット","桃","紅茶","マスカット","ライチ"],
+ desc:"ゲイシャ品種の聖地。エスメラルダ農園のゲイシャは「ベストオブパナマ」オークションで毎年最高値を更新。紅茶のような繊細な香りと透明感のある甘みは他の産地では体験できない。",
+ trivia:"ゲイシャ品種はもともとエチオピアのゲシャ村が起源。2004年のCOEでエスメラルダ農園が1位を獲得し世界的に有名になった。最高値は1ポンド1,000ドルを超えたこともある。",
+ p:{a:8,s:9,b:4,bi:2,ar:10},alt:1600,altStr:"1,400〜1,800m",
+ process:"ウォッシュド / ナチュラル / アナエロビック",varieties:"Geisha（Gesha）",
+ harvest:"12月〜3月",prod:"少量（高品質特化）",
+ brew:["ハンドドリップ（低温）","ウォータードリップ"],
+ tips:"85〜88℃の低温でゆっくり抽出が鉄則。高温では繊細な香りが飛ぶ。"},
+
+{id:"nicaragua",name:"ニカラグア",en:"Nicaragua",flag:"🇳🇮",cont:"central",
+ region:"Jinotega / Matagalpa / Nueva Segovia",
+ flavors:["チョコ","ナッツ","スムーズ","マイルド","キャラメル"],
+ desc:"中米の中でもマイルドで飲みやすいコーヒーを産する。ヒノテガ・マタガルパ地区の高地アラビカはチョコレートとナッツの穏やかな風味。コスパが高く評価される。",
+ trivia:"1980年代のサンディニスタ革命後の混乱でコーヒー産業が一時崩壊したが90年代以降に復活。現在は有機認証・フェアトレード農園が多い。象豆（マラゴジッペ）が名物。",
+ p:{a:5,s:6,b:7,bi:5,ar:6},alt:1200,altStr:"900〜1,700m",
+ process:"ウォッシュド / ハニー",varieties:"Caturra / Catuai / Maragogype",
+ harvest:"12月〜3月",prod:"約15万トン/年",
+ brew:["ハンドドリップ","フレンチプレス"],
+ tips:"マラゴジッペ（象豆）が名物。豆が非常に大きくまろやかな口当たりが特徴。"},
+
+{id:"cuba",name:"キューバ",en:"Cuba",flag:"🇨🇺",cont:"central",
+ region:"Sierra Maestra / Escambray / Guantánamo",
+ flavors:["マイルド","クリーン","ナッツ","スムーズ","ほのかなチョコ"],
+ desc:"クリスタル・マウンテンは「世界三大コーヒー」の一つとも呼ばれる。米国の経済封鎖の影響で日本への輸出が限られてきたが、マイルドで飲みやすい風味が評価される。",
+ trivia:"キューバコーヒーは「コラディート」という独自のエスプレッソ文化がある。砂糖とともに飲む習慣が根付いており非常に甘く濃い。地元ではプラスチックカップで提供される。",
+ p:{a:4,s:6,b:7,bi:6,ar:6},alt:1200,altStr:"800〜1,600m",
+ process:"ウォッシュド",varieties:"Typica / Bourbon",
+ harvest:"9月〜2月",prod:"約1万トン/年",
+ brew:["モカポット","エスプレッソ","ハンドドリップ"],
+ tips:"砂糖を少し加えて飲むキューバスタイルで本場の味を体験してみて。"},
+
+{id:"jamaica",name:"ジャマイカ",en:"Jamaica",flag:"🇯🇲",cont:"central",
+ region:"Blue Mountain / High Mountain / Jamaica Supreme",
+ flavors:["マイルド","ナッツ","クリーミー","ハーブ","ほのかな甘み"],
+ desc:"ブルーマウンテンは世界三大コーヒーのひとつ。刺激が少なく極めてバランスが良い。日本向け輸出が全体の約80%を占め、日本人に最も愛されているプレミアムコーヒー。",
+ trivia:"ブルーマウンテンの名前は朝夕に霧がかかり青く見えることに由来。樽（バレル）で熟成してから出荷される独特の慣習がある。日本の丸紅が品質管理に歴史的に関与。",
+ p:{a:5,s:7,b:6,bi:4,ar:7},alt:1300,altStr:"900〜1,700m",
+ process:"ウォッシュド",varieties:"Typica",
+ harvest:"9月〜3月",prod:"約1,000トン/年（非常に希少）",
+ brew:["ハンドドリップ","サイフォン","ネルドリップ"],
+ tips:"繊細な風味を生かすには浅〜中煎り。90〜92℃でゆっくり丁寧に。"},
+
+{id:"haiti",name:"ハイチ",en:"Haiti",flag:"🇭🇹",cont:"central",
+ region:"Thiotte / Belladère / Kenscoff",
+ flavors:["マイルド","チョコ","ナッツ","スムーズ"],
+ desc:"かつては世界最大のコーヒー輸出国だったが、政情不安や2010年の大地震で産業が壊滅的打撃を受けた。現在は復興中で品質向上への取り組みが続く希少産地。",
+ trivia:"18世紀のハイチ（当時サン＝ドマング）は世界のコーヒー生産の半分以上を担っていた。現在の生産量は最盛期の数十分の一に過ぎない。古代品種が残る。",
+ p:{a:5,s:6,b:6,bi:5,ar:6},alt:900,altStr:"600〜1,500m",
+ process:"ウォッシュド",varieties:"Typica / Bourbon（古代品種）",
+ harvest:"8月〜3月",prod:"約3万トン/年",
+ brew:["ハンドドリップ","フレンチプレス"],
+ tips:"復興支援の意味でも飲んでみる価値がある。古代品種由来の希少産地。"},
+
+{id:"dominican",name:"ドミニカ共和国",en:"Dominican Republic",flag:"🇩🇴",cont:"central",
+ region:"Barahona / Cibao / Valdesia",
+ flavors:["マイルド","チョコ","キャラメル","クリーン"],
+ desc:"カリブ海の島国。バラオナ地区の高地アラビカが品質で知られる。フルボディでチョコレートとキャラメルの風味が特徴。フェアトレード・オーガニック認証農園が増加中。",
+ trivia:"ドミニカ共和国のコーヒーは「サント・ドミンゴ」という名前で歴史的に欧州に輸出されてきた。ハイチとは同じ島（イスパニョーラ島）を共有する。",
+ p:{a:5,s:6,b:7,bi:5,ar:6},alt:1000,altStr:"600〜1,600m",
+ process:"ウォッシュド",varieties:"Typica / Bourbon / Caturra",
+ harvest:"9月〜3月",prod:"約5万トン/年",
+ brew:["ハンドドリップ","モカポット"],
+ tips:"カリブコーヒーとして飲みやすくバランスが良い。ハイチとの飲み比べも面白い。"},
+
+{id:"hawaii",name:"ハワイ",en:"Hawaii (USA)",flag:"🌺",cont:"central",
+ region:"Kona / Ka'u / Maui / Hamakua",
+ flavors:["ナッツ","バニラ","キャラメル","マイルド","スイート"],
+ desc:"世界三大コーヒーのひとつ「コナコーヒー」の産地。マウナロア山の西斜面で午前は日差し、午後は霧に包まれる独特の気候が良質な豆を育てる。アメリカ唯一の大規模産地。",
+ trivia:"「コナブレンド」は法律で10%以上の混合が義務付けられているが、純粋なコナ100%は「100% Kona」表記を必ず確認。偽装品との戦いが今も続いている。",
+ p:{a:5,s:8,b:6,bi:4,ar:7},alt:600,altStr:"150〜900m",
+ process:"ウォッシュド",varieties:"Guatemalan Typica（グアテマラン・ティピカ）",
+ harvest:"8月〜1月",prod:"約1,400トン/年（希少）",
+ brew:["ハンドドリップ","サイフォン","ネルドリップ"],
+ tips:"純コナは「100% Kona」表記を必ず確認。滑らかな口当たりで贈り物にも最適。"},
+
+// ───── ASIA & PACIFIC ─────
+{id:"indonesia",name:"インドネシア",en:"Indonesia",flag:"🇮🇩",cont:"asia",
+ region:"Sumatra（マンデリン）/ Java / Sulawesi / Flores",
+ flavors:["アース","ハーブ","ダークチョコ","スモーク","スパイス","木の香り"],
+ desc:"スマトラ式精製（ウェットハル）による強いアーシー感・ハーバル感が特徴。ボディが非常に重く低酸味のため、ミルクとの相性が抜群。マンデリンが代表銘柄。",
+ trivia:"ジャワ島はかつてオランダ東インド会社がコーヒーを独占栽培した地。「ジャバ」という言葉がコーヒーの俗語になったのはここから。コピ・ルアク（ジャコウネココーヒー）も有名。",
+ p:{a:2,s:5,b:10,bi:8,ar:7},alt:1200,altStr:"1,000〜1,500m",
+ process:"ウェットハル（スマトラ式）",varieties:"Ateng / Tim Tim / Jember",
+ harvest:"9月〜12月（スマトラ）",prod:"約78万トン/年（世界4位）",
+ brew:["フレンチプレス","パーコレーター","エスプレッソ"],
+ tips:"カフェラテのベースに最適。深煎りにするとスモーキーさが増す。"},
+
+{id:"vietnam",name:"ベトナム",en:"Vietnam",flag:"🇻🇳",cont:"asia",
+ region:"Da Lat / Buôn Ma Thuột / Son La / Gia Lai",
+ flavors:["アース","スモーク","チョコ","強い苦味","濃厚なコク"],
+ desc:"ブラジルに次ぐ世界第2位の生産国（主にロブスタ）。カフェ・スア・ダー（コンデンスミルク入りアイスコーヒー）が国民的飲み物。近年ダラット周辺でアラビカのスペシャルティも急増。",
+ trivia:"ベトナムのロブスタは主にインスタントコーヒーの原料に使われる。「卵コーヒー（Cà Phê Trứng）」という卵黄とコンデンスミルクを泡立てたクリームをのせる独特の飲み方が有名。",
+ p:{a:2,s:4,b:10,bi:9,ar:5},alt:800,altStr:"500〜1,500m",
+ process:"ナチュラル / ハニー",varieties:"Robusta / Arabica（ダラット）",
+ harvest:"11月〜2月",prod:"約180万トン/年（世界2位）",
+ brew:["ベトナム式ドリップ（フィン）","コールドブリュー","エスプレッソ"],
+ tips:"コンデンスミルクを加えたベトナムスタイルで飲むと濃厚な甘さが際立つ。"},
+
+{id:"india",name:"インド",en:"India",flag:"🇮🇳",cont:"asia",
+ region:"Chikmagalur / Coorg / Nilgiri / Araku Valley",
+ flavors:["スパイス","アース","ダークチョコ","タバコ","ハーブ"],
+ desc:"モンスーン（マラバール）コーヒーが有名で、生豆をモンスーンの風にさらして熟成させる独特の加工法が特有の低酸味・重厚ボディを生む。シェードグロウンが多く香辛料との混作が風味に影響。",
+ trivia:"「マラバールコーヒー」は収穫後の生豆を海風にさらす「モンスーニング」という特殊工程で作られる。かつて欧州への長い船旅で偶然発見されたこの風味を意図的に再現している。",
+ p:{a:3,s:5,b:9,bi:7,ar:8},alt:1100,altStr:"600〜1,500m",
+ process:"ウォッシュド / モンスーン（マラバール）",varieties:"Kent / S795 / Selection9",
+ harvest:"11月〜2月",prod:"約35万トン/年（世界6位）",
+ brew:["モカポット","フレンチプレス","イブリック"],
+ tips:"マラバールはエスプレッソで使うとクリーミーなクレマが出やすい。スパイスチャイとの相性も抜群。"},
+
+{id:"yemen",name:"イエメン",en:"Yemen",flag:"🇾🇪",cont:"asia",
+ region:"Mocha / Haraaz / Sana'a / Bani Mattar",
+ flavors:["ワイン","ドライフルーツ","スパイス","チョコレート","ハチミツ"],
+ desc:"世界最古のコーヒー産地のひとつ。エチオピアから伝わったコーヒーをアラビア半島で最初に栽培・交易した地。古代品種が多く残り複雑でワインのような個性。「モカ」という名の起源。",
+ trivia:"15世紀頃からイエメンのイスラム修道士がコーヒーを修行に使い始めたとされる。コーヒーハウス（カーフワ・ハーネ）の発祥地でもあり、今日のカフェ文化の源流がここにある。",
+ p:{a:7,s:6,b:7,bi:6,ar:9},alt:1800,altStr:"1,500〜2,500m",
+ process:"ナチュラル（古代式）",varieties:"Dawairi / Haraz / Ismaili（在来種）",
+ harvest:"10月〜12月",prod:"約2万トン/年（紛争で減少）",
+ brew:["イブリック（トルコ式）","ハンドドリップ","モカポット"],
+ tips:"砂糖を少し加えたイブリックで飲むと古典的なモカの風味が楽しめる。希少性から価格が高め。"},
+
+{id:"png",name:"パプアニューギニア",en:"Papua New Guinea",flag:"🇵🇬",cont:"asia",
+ region:"Wahgi Valley / Kainantu / Western Highlands",
+ flavors:["アース","フルーティー","ハーブ","スパイス","スムーズ"],
+ desc:"インドネシアに隣接する熱帯の島国。ジャワ・マンデリンと似たアーシーな個性を持ちながら、高地栽培によるフルーティーさも持ち合わせる独特の産地。",
+ trivia:"パプアニューギニアのコーヒーはコロンビアから持ち込まれたティピカ品種が多い。農薬がほぼ使われない伝統的な農法で事実上オーガニックに近い栽培が行われている。",
+ p:{a:5,s:5,b:8,bi:6,ar:6},alt:1400,altStr:"1,200〜2,000m",
+ process:"ウォッシュド / ナチュラル",varieties:"Typica / Arusha",
+ harvest:"4月〜9月",prod:"約6万トン/年",
+ brew:["フレンチプレス","ハンドドリップ"],
+ tips:"インドネシア好きな方におすすめ。アーシーさの中にフルーティーさがある。"},
+
+{id:"philippines",name:"フィリピン",en:"Philippines",flag:"🇵🇭",cont:"asia",
+ region:"Benguet / Mt.Apo（ダバオ）/ Sagada",
+ flavors:["アース","スパイス","チョコ","強い苦味","ユニーク"],
+ desc:"世界4大コーヒー品種（アラビカ・ロブスタ・リベリカ・エクセルサ）をすべて生産する唯一の国。特にリベリカ種（バラコ）の風味は独特で濃厚な苦味と個性的な香りを持つ。",
+ trivia:"バラココーヒーは19世紀後半に疫病でアラビカが壊滅した際の代替として広まったリベリカ種。フィリピン人に深く愛されているが世界市場ではほぼ流通しない貴重品。",
+ p:{a:4,s:5,b:7,bi:7,ar:5},alt:1100,altStr:"700〜2,000m",
+ process:"ウォッシュド / ナチュラル",varieties:"Arabica / Robusta / Liberica(Baraco) / Excelsa",
+ harvest:"10月〜3月",prod:"約3万トン/年",
+ brew:["エスプレッソ","フレンチプレス","モカポット"],
+ tips:"バラコ（リベリカ）は一度は飲んでおきたい唯一無二の体験。通常のコーヒーとは全く異なる。"},
+
+{id:"myanmar",name:"ミャンマー",en:"Myanmar",flag:"🇲🇲",cont:"asia",
+ region:"Shan State / Chin State / Mandalay",
+ flavors:["フルーティー","フラワー","チョコ","クリーン","マイルド"],
+ desc:"シャン州の高地で栽培されるアラビカはクリーンな風味を持つ新興産地。政情不安の中でも農家が高品質化に取り組んでいる。近年スペシャルティとして認知が広まりつつある。",
+ trivia:"ミャンマーのコーヒー産業は1980〜90年代に麻薬代替作物として促進された経緯がある。シャン州の山岳地帯は標高が高くコーヒー栽培の好適地として注目されている。",
+ p:{a:6,s:6,b:6,bi:5,ar:6},alt:1200,altStr:"1,000〜1,600m",
+ process:"ウォッシュド / ハニー",varieties:"Typica / Catuai / SL34",
+ harvest:"11月〜2月",prod:"約2万トン/年",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"まだ流通量が少ない希少産地。見つけたら手に入れる価値あり。"},
+
+{id:"thailand",name:"タイ",en:"Thailand",flag:"🇹🇭",cont:"asia",
+ region:"Chiang Rai / Doi Chaang / Doi Inthanon",
+ flavors:["クリーン","マイルド","ナッツ","チョコ","フルーティー"],
+ desc:"北部チェンライ周辺の高地（ドイ・チャーン等）で栽培されるアラビカがスペシャルティとして評価される。かつては麻薬代替作物として政府が推進し、現在は品質向上で国際的に注目。",
+ trivia:"「ドイ・チャーン」ブランドはカナダへの輸出から始まり今や国際的に認知されたタイのスペシャルティブランド。山岳民族（アカ族等）が栽培を担っており文化的背景も深い。",
+ p:{a:5,s:6,b:5,bi:4,ar:6},alt:1200,altStr:"800〜1,600m",
+ process:"ウォッシュド / ハニー",varieties:"Typica / Catuai / SL28",
+ harvest:"11月〜2月",prod:"約3万トン/年",
+ brew:["ハンドドリップ","エアロプレス","タイ式アイスコーヒー"],
+ tips:"タイ式アイスコーヒー（コーヒーバオ）でコンデンスミルクと合わせると現地気分。"},
+
+{id:"laos",name:"ラオス",en:"Laos",flag:"🇱🇦",cont:"asia",
+ region:"Bolaven Plateau（ボラヴェン高原）/ Paksong",
+ flavors:["アース","スモーク","チョコ","苦味","コク"],
+ desc:"ボラヴェン高原は年間降水量が豊富で肥沃な火山性土壌。主にロブスタ種だが、近年アラビカのスペシャルティ化が進む。フランス植民地時代に持ち込まれたコーヒー文化が根付く。",
+ trivia:"ラオスのコーヒーはフランス植民地時代（1893〜1953年）に農園が整備された。現地では砂糖とコンデンスミルクを加えた濃いコーヒーを楽しむ文化がある。",
+ p:{a:3,s:5,b:8,bi:7,ar:5},alt:900,altStr:"700〜1,300m",
+ process:"ウォッシュド / ナチュラル",varieties:"Robusta / Arabica（一部）",
+ harvest:"11月〜2月",prod:"約2万トン/年",
+ brew:["フレンチプレス","モカポット","コールドブリュー"],
+ tips:"スペシャルティ化されたアラビカはぜひドリップで。インスタントのイメージを覆す品質。"},
+
+{id:"china",name:"中国（雲南省）",en:"China (Yunnan)",flag:"🇨🇳",cont:"asia",
+ region:"Pu'er / Baoshan / Lincang / Dehong",
+ flavors:["フルーティー","フラワー","マイルド","チョコ","クリーン"],
+ desc:"雲南省の高地で栽培されるアラビカは意外なほど品質が高い。プーアール茶で有名なプーアール市でコーヒーも栽培される。中国国内の急増するコーヒー消費を支える大規模産地。",
+ trivia:"中国のコーヒー消費量は年率約30%で急増中。スターバックスの中国急拡大が国内産コーヒーの品質向上を後押し。2022年には約12万トンを生産し輸出も増加中。",
+ p:{a:5,s:6,b:6,bi:5,ar:7},alt:1400,altStr:"1,000〜2,000m",
+ process:"ウォッシュド / ハニー",varieties:"Catimor / Typica / Bourbon",
+ harvest:"11月〜3月",prod:"約12万トン/年",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"雲南スペシャルティは品質向上が著しい。中国茶文化と融合した独自の茶風味コーヒーも要注目。"},
+
+{id:"timor",name:"東ティモール",en:"Timor-Leste",flag:"🇹🇱",cont:"asia",
+ region:"Ermera / Manufahi / Ainaro",
+ flavors:["アース","ハーブ","チョコ","スモーク","スパイス"],
+ desc:"インドネシア東部に位置する新興国（2002年独立）。インドネシア統治時代からのコーヒー産業を引き継ぎ、「ティモールハイブリッド」という自然交配品種が存在する。有機認証農園が多い。",
+ trivia:"「ティモールハイブリッド（HdT）」はアラビカとロブスタが自然交配した品種で、病害虫耐性が高く世界中の品種改良に利用されている。購入が復興支援に直結する産地。",
+ p:{a:3,s:5,b:8,bi:6,ar:5},alt:1200,altStr:"800〜1,800m",
+ process:"ウォッシュド / ナチュラル",varieties:"Typica / Timor Hybrid（HdT）",
+ harvest:"6月〜9月",prod:"約1万トン/年",
+ brew:["フレンチプレス","ハンドドリップ"],
+ tips:"インドネシアに似たアーシーさがあるが少し軽め。支援の意味でも購入する価値がある。"},
+
+// ───── AFRICA (追加) ─────
+{id:"madagascar",name:"マダガスカル",en:"Madagascar",flag:"🇲🇬",cont:"africa",
+ region:"Fianarantsoa / Vakinankaratra / Itasy",
+ flavors:["フルーティー","フラワー","ベリー","シトラス","クリーン"],
+ desc:"アフリカ東海岸のインド洋に浮かぶ大島。エチオピア・ルワンダに似たフローラルな風味を持つ。有機農業が中心で近年スペシャルティとして注目が高まっている。バニラとコーヒーを同じ農園で栽培することも。",
+ trivia:"マダガスカルは世界最高品質のバニラの産地でもある。コーヒーは主に輸出向けで国内消費はほとんどなく、農家がコーヒーの味を知らないケースもある。生物多様性の宝庫で固有種が多い。",
+ p:{a:7,s:7,b:6,bi:4,ar:8},alt:1200,altStr:"1,000〜1,500m",
+ process:"ウォッシュド / ナチュラル",varieties:"Bourbon / Typica",
+ harvest:"5月〜9月",prod:"約4万トン/年（ロブスタ含む）",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"フローラルで飲みやすい。エチオピア・ルワンダが好きな方に。"},
+
+{id:"ivory-coast",name:"コートジボワール",en:"Côte d'Ivoire",flag:"🇨🇮",cont:"africa",
+ region:"Man / Daloa / Aboisso / Gagnoa",
+ flavors:["アース","チョコ","ナッツ","苦味","スモーク"],
+ desc:"世界のロブスタ生産大国のひとつ。かつてはブラジルに次ぐ生産量を誇ったが政情不安で減少。安価なロブスタとして主にインスタントやエスプレッソブレンドに使用される。世界最大のカカオ産地でもある。",
+ trivia:"コートジボワールはかつてフランスのカフェ文化を支えた重要産地。カカオの世界一の輸出国でもあり「チョコレートとコーヒーの国」と呼べる。内戦後の復興とともに生産量の回復が進んでいる。",
+ p:{a:3,s:4,b:9,bi:8,ar:5},alt:400,altStr:"200〜800m",
+ process:"ナチュラル",varieties:"Robusta",
+ harvest:"10月〜3月",prod:"約10万トン/年",
+ brew:["エスプレッソ","フレンチプレス"],
+ tips:"ロブスタなのでエスプレッソに使うとクレマが出やすい。インスタントのベースとして世界中で使われる。"},
+
+{id:"angola",name:"アンゴラ",en:"Angola",flag:"🇦🇴",cont:"africa",
+ region:"Uíge / Kwanza Norte / Malanje",
+ flavors:["アース","チョコ","スパイス","ナッツ","ウッディ"],
+ desc:"かつてはブラジルに次ぐ世界第2位のコーヒー輸出国だったが、内戦（1975〜2002年）により産業が壊滅。現在は復興中で往年の品質を取り戻そうとしている歴史ある産地。",
+ trivia:"1970年代のアンゴラは年間20万トン以上を輸出していた。内戦で農園は破壊され農家は逃散。現在は10分の1以下の生産量まで落ち込んでいるが、復興への取り組みが続いている。",
+ p:{a:4,s:5,b:8,bi:7,ar:6},alt:1400,altStr:"1,000〜1,800m",
+ process:"ウォッシュド / ナチュラル",varieties:"Robusta / Arabica",
+ harvest:"6月〜10月",prod:"約1万トン/年（復興中）",
+ brew:["フレンチプレス","モカポット"],
+ tips:"歴史ある産地の復活を応援する意味でも飲んでみる価値がある。"},
+
+{id:"mozambique",name:"モザンビーク",en:"Mozambique",flag:"🇲🇿",cont:"africa",
+ region:"Manica / Zambézia / Nampula",
+ flavors:["クリーン","フルーティー","チョコ","マイルド"],
+ desc:"アフリカ南東部の産地。マニカ州の高地（ジンバブエとの国境付近）で栽培されるアラビカは品質が高い。ポルトガル植民地時代に持ち込まれたコーヒーが根付いた。内戦後の農業復興の一環として再建が進む。",
+ trivia:"モザンビークのコーヒーはポルトガルへの輸出が主流だった歴史がある。ジンバブエ・マラウイ・ザンビアと国境を接するアフリカ南東部の産地として注目されている。",
+ p:{a:6,s:6,b:6,bi:5,ar:6},alt:1100,altStr:"800〜1,500m",
+ process:"ウォッシュド",varieties:"Bourbon / Geisha / Typica",
+ harvest:"5月〜8月",prod:"非常に少量（希少）",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"アフリカ南東部の希少産地。ジンバブエ・マラウイ・ザンビアと並べてアフリカ南部産地を制覇したい方に。"},
+
+{id:"nigeria",name:"ナイジェリア",en:"Nigeria",flag:"🇳🇬",cont:"africa",
+ region:"Taraba / Cross River / Ogun / Ondo",
+ flavors:["アース","チョコ","ナッツ","スパイス"],
+ desc:"アフリカ最大の人口を持つナイジェリアは主にロブスタを生産。クロスリバー州などでアラビカも栽培される。国内消費が中心で輸出量は少ないが、農業多様化政策でコーヒーが再注目されている。",
+ trivia:"ナイジェリアのコーヒー産業は1950〜60年代に政府主導で拡大したが、石油発見後に農業が軽視され衰退。現在は農業多様化政策でコーヒーが再注目されている。",
+ p:{a:3,s:4,b:9,bi:8,ar:5},alt:900,altStr:"500〜1,500m",
+ process:"ナチュラル / ウォッシュド",varieties:"Robusta / Arabica（一部）",
+ harvest:"10月〜3月",prod:"約2万トン/年",
+ brew:["エスプレッソ","フレンチプレス"],
+ tips:"ロブスタ主体。インスタントやエスプレッソブレンドのベース向き。"},
+
+// ───── SOUTH AMERICA (追加) ─────
+{id:"venezuela",name:"ベネズエラ",en:"Venezuela",flag:"🇻🇪",cont:"south",
+ region:"Mérida / Táchira / Trujillo / Caracas周辺",
+ flavors:["チョコ","キャラメル","スムーズ","マイルド","ナッツ"],
+ desc:"アンデス山脈の高地産地。かつては高品質な「マラカイボ」コーヒーとして欧州で高く評価されたが、政治経済危機でコーヒー産業が大幅に縮小。品質復活への取り組みが続く歴史ある産地。",
+ trivia:"「マラカイボ」は19世紀から欧州に輸出されたベネズエラ産コーヒーの代名詞。マラカイボ湖の港から出荷されたためこの名がついた。現在は生産者の流出が深刻な課題となっている。",
+ p:{a:5,s:7,b:7,bi:5,ar:6},alt:1500,altStr:"1,000〜2,000m",
+ process:"ウォッシュド",varieties:"Typica / Bourbon / Caturra",
+ harvest:"10月〜2月",prod:"非常に少量（政情不安で減少）",
+ brew:["ハンドドリップ","エスプレッソ"],
+ tips:"見つけたら歴史的産地を体験できる貴重な機会。スムーズで飲みやすい。"},
+
+// ───── CENTRAL AMERICA & CARIBBEAN (追加) ─────
+{id:"puerto-rico",name:"プエルトリコ",en:"Puerto Rico (USA)",flag:"🇵🇷",cont:"central",
+ region:"Yauco / Adjuntas / Jayuya / Ponce",
+ flavors:["スムーズ","ナッツ","チョコ","マイルド","クリーン"],
+ desc:"カリブ海の米自治領。「ヤウコ・セレクト」など高品質なアラビカが生産される。かつては大規模産地だったが現在は高級特産品として少量生産が続く。かつて欧州王室にも献上された歴史がある。",
+ trivia:"プエルトリコは19世紀から20世紀初頭にかけて世界最高品質のコーヒーの一つとして欧州王室にも献上されていた。現在は高価格のスペシャルティとして復活しつつある。",
+ p:{a:5,s:7,b:6,bi:4,ar:7},alt:600,altStr:"300〜1,000m",
+ process:"ウォッシュド",varieties:"Typica / Bourbon",
+ harvest:"8月〜2月",prod:"非常に少量（高級品特化）",
+ brew:["ハンドドリップ","サイフォン"],
+ tips:"ジャマイカ・コナと並ぶカリブ・太平洋プレミアムの一角。ヤウコ・セレクトは欧州で高評価。"},
+
+{id:"trinidad",name:"トリニダード・トバゴ",en:"Trinidad & Tobago",flag:"🇹🇹",cont:"central",
+ region:"Paramin / Blanchisseuse / Speyside（Tobago）",
+ flavors:["チョコ","スパイス","アース","フルーティー"],
+ desc:"カリブ海の小島国。コーヒーの生産量は非常に少ないが、カカオとコーヒーを両方生産する珍しい産地。スペシャルティとしての取り組みも始まっており、チョコレート産業との融合が注目される。",
+ trivia:"トリニダード・トバゴはカカオ（トリニタリオ種）の原産地として有名。コーヒーとカカオが同じ熱帯環境で栽培される「チョコレートとコーヒーの島」と呼べる産地。",
+ p:{a:5,s:6,b:7,bi:6,ar:6},alt:600,altStr:"300〜900m",
+ process:"ウォッシュド / ナチュラル",varieties:"Typica / Robusta",
+ harvest:"6月〜12月",prod:"非常に少量",
+ brew:["ハンドドリップ","フレンチプレス"],
+ tips:"カカオ産地との組み合わせでショコラティエが注目している産地。希少性が高い。"},
+
+// ───── ASIA & PACIFIC (追加) ─────
+{id:"nepal",name:"ネパール",en:"Nepal",flag:"🇳🇵",cont:"asia",
+ region:"Gulmi / Palpa / Arghakhanchi / Kaski",
+ flavors:["フローラル","フルーティー","クリーン","まろやか","ハーブ"],
+ desc:"ヒマラヤ山麓で栽培される高地アラビカ。超高地（1,200〜1,800m）の冷涼な気候が緩やかな成熟を促し、クリーンでフルーティーな風味を生む。近年急速に品質が向上している新興スペシャルティ産地。",
+ trivia:"ネパールのコーヒー産業は1990年代から政府主導で農民への普及が始まった。ヒマラヤトレッキングのルート沿いの農村でも栽培が広がり、観光と農業の融合が進んでいる。",
+ p:{a:7,s:7,b:5,bi:3,ar:7},alt:1500,altStr:"1,200〜1,800m",
+ process:"ウォッシュド",varieties:"Typica / Bourbon",
+ harvest:"11月〜1月",prod:"非常に少量（数百トン）",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"ヒマラヤの澄んだ空気が育てたクリーンカップ。希少性が高く見つけたら試す価値大。"},
+
+{id:"sri-lanka",name:"スリランカ",en:"Sri Lanka",flag:"🇱🇰",cont:"asia",
+ region:"Kandy / Nuwara Eliya / Badulla / Matale",
+ flavors:["スパイス","チョコ","アース","フルーティー","まろやか"],
+ desc:"かつて「セイロンコーヒー」として19世紀に世界的に有名だったが、1869年のコーヒーさび病により産業がほぼ壊滅し紅茶に転換。現在は少量ながらコーヒーが復活しつつある歴史深い産地。",
+ trivia:"スリランカがコーヒーから紅茶に転換した1870年代の出来事は、イギリスの「ティータイム文化」が生まれるきっかけとなった。コーヒーさび病（Hemileia vastatrix）の歴史的教訓は世界の産地に影響を与え続けている。",
+ p:{a:5,s:5,b:7,bi:6,ar:7},alt:1500,altStr:"1,000〜2,000m",
+ process:"ウォッシュド",varieties:"S.288 / Old Chikmagalur",
+ harvest:"11月〜2月",prod:"非常に少量（数千トン）",
+ brew:["ハンドドリップ","モカポット"],
+ tips:"セイロン紅茶で有名な島でのコーヒー復活という歴史的意義がある。スパイスの風味が特徴的。"},
+
+{id:"malaysia",name:"マレーシア",en:"Malaysia",flag:"🇲🇾",cont:"asia",
+ region:"Sabah / Tenom / Ipoh（ペナン）/ Cameron Highlands",
+ flavors:["アース","チョコ","ナッツ","バター","コク"],
+ desc:"ボルネオ島サバ州と半島マレーシアで生産。「ホワイトコーヒー」（練乳入り）の文化が有名なイポーは独特のコーヒー文化を持つ。サバ産アラビカはスペシャルティとして注目中。",
+ trivia:"マレーシアの「ホワイトコーヒー」はイポーで1920年代に生まれた文化。マーガリンで炒ったコーヒー豆に練乳を加える独特のスタイルで、現在はインスタントとして世界に輸出されている。",
+ p:{a:4,s:6,b:8,bi:7,ar:6},alt:1200,altStr:"800〜1,600m（サバ）",
+ process:"ウォッシュド / ナチュラル",varieties:"Liberica / Arabica（サバ）/ Robusta",
+ harvest:"11月〜2月",prod:"非常に少量（アラビカ）",
+ brew:["マレーシア式ホワイトコーヒー","ハンドドリップ（サバ産）"],
+ tips:"リベリカ種が生産される珍しい産地。イポーのホワイトコーヒーは独特の甘さとコクで一度試してみて。"},
+
+{id:"australia",name:"オーストラリア",en:"Australia",flag:"🇦🇺",cont:"asia",
+ region:"Queensland（Atherton Tablelands）/ New South Wales / Byron Bay",
+ flavors:["クリーン","ナッツ","チョコ","スムーズ","マイルド"],
+ desc:"世界最南端に近い産地のひとつ。クイーンズランド州アサートン高原で栽培される高品質アラビカ。機械化が進んだ農園が多く品質管理が徹底されている。価格は高めだが品質は確か。",
+ trivia:"オーストラリアのコーヒー産業は小規模だが、全量機械収穫・農薬最少という高い農業基準を維持している。「シングルオリジンのコーヒーを地元で」という意識が強いオーストラリア人消費者に支持されている。",
+ p:{a:5,s:7,b:6,bi:4,ar:6},alt:900,altStr:"700〜1,200m",
+ process:"ウォッシュド / ナチュラル",varieties:"Bourbon / Typica / K7",
+ harvest:"6月〜9月",prod:"非常に少量（約100〜200トン）",
+ brew:["ハンドドリップ","エアロプレス"],
+ tips:"機械収穫ながら品質が高い珍しいケース。世界で最も南に近い産地のひとつとして希少価値がある。"},
+
+{id:"solomon",name:"ソロモン諸島",en:"Solomon Islands",flag:"🇸🇧",cont:"asia",
+ region:"Guadalcanal / Malaita / Isabel",
+ flavors:["アース","フルーティー","チョコ","ハーブ","スムーズ"],
+ desc:"パプアニューギニアに隣接する南太平洋の島嶼国。PNG産に似たアーシーでフルーティーな個性を持つ。農薬使用が少なく事実上オーガニックに近い環境で生産されるNGO支援産地。",
+ trivia:"ソロモン諸島のコーヒーは第二次世界大戦の激戦地ガダルカナル島で栽培される。NGOが支援する小農家コミュニティが品質向上に取り組んでおり、購入が支援にもなる。",
+ p:{a:5,s:5,b:8,bi:6,ar:6},alt:1000,altStr:"600〜1,500m",
+ process:"ウォッシュド / ナチュラル",varieties:"Typica",
+ harvest:"6月〜9月",prod:"非常に少量（約1,000トン）",
+ brew:["フレンチプレス","ハンドドリップ"],
+ tips:"PNG産コーヒーが好きなら試してみる価値あり。支援購入にもなる希少産地。"},
+
+{id:"cambodia",name:"カンボジア",en:"Cambodia",flag:"🇰🇭",cont:"asia",
+ region:"Mondulkiri / Ratanakiri / Kampot",
+ flavors:["アース","チョコ","スパイス","ハーブ","スムーズ"],
+ desc:"メコン流域の国。モンドルキリ州の高地でアラビカが栽培されるほか全国的にロブスタも生産。フランス植民地時代のコーヒー文化が残り、現在はスペシャルティ化の取り組みが進んでいる。",
+ trivia:"カンボジアでは「カフェ・タイク」と呼ばれるコンデンスミルク入りアイスコーヒーが一般的。高地のモンドルキリは少数民族が栽培する伝統的なアラビカの産地として注目されている。",
+ p:{a:4,s:5,b:8,bi:7,ar:5},alt:800,altStr:"600〜1,200m",
+ process:"ウォッシュド / ナチュラル",varieties:"Robusta / Arabica（一部）",
+ harvest:"11月〜2月",prod:"約3万トン/年",
+ brew:["フレンチプレス","ベトナム式ドリップ（フィン）"],
+ tips:"ラオス・ベトナムに近い風味。東南アジアのコーヒーを制覇したい方に。"},
+
+{id:"new-caledonia",name:"ニューカレドニア",en:"New Caledonia",flag:"🇳🇨",cont:"asia",
+ region:"Nouméa周辺 / 北部（Koumac）",
+ flavors:["フローラル","フルーティー","クリーン","マイルド"],
+ desc:"フランス領の南太平洋の島。少量ながらアラビカが栽培されフランス本国向けに輸出される希少品。熱帯の豊かな自然の中で栽培される有機コーヒーとして価値があり、現地では旅行のお土産としても人気。",
+ trivia:"ニューカレドニアは「天国に一番近い島」として観光地として有名だが、コーヒー産業も細々と続いている。フランス食文化の影響で現地でもエスプレッソ文化が根付いている。",
+ p:{a:6,s:6,b:5,bi:4,ar:7},alt:600,altStr:"400〜1,000m",
+ process:"ウォッシュド",varieties:"Typica / Bourbon",
+ harvest:"5月〜9月",prod:"非常に少量（数十〜数百トン）",
+ brew:["ハンドドリップ","エスプレッソ"],
+ tips:"旅行のお土産として現地で購入できる希少コーヒー。フランス文化が染み込んだ島産の一杯。"},
+
+{id:"vanuatu",name:"バヌアツ",en:"Vanuatu",flag:"🇻🇺",cont:"asia",
+ region:"Tanna Island / Santo / Ambae",
+ flavors:["アース","フルーティー","スパイス","ハーブ"],
+ desc:"バヌアツのタンナ島で栽培されるオーガニックコーヒーは、活火山ヤスール山の火山灰土壌が生み出す独特のミネラル感が特徴。農薬をほぼ使わない伝統的農法で生産される。",
+ trivia:"タンナ島は「ジョン・フラム信仰（カーゴ・カルト）」で知られる文化的に独特な島。農薬・化学肥料なしの伝統農業が保たれており、事実上オーガニックのコーヒーが生産されている。",
+ p:{a:5,s:5,b:7,bi:6,ar:6},alt:600,altStr:"300〜1,000m",
+ process:"ナチュラル / ウォッシュド",varieties:"Typica",
+ harvest:"6月〜9月",prod:"非常に少量（約300〜500トン）",
+ brew:["フレンチプレス","ハンドドリップ"],
+ tips:"活火山の土壌で育つ世界でも珍しいコーヒー。ミネラル感のある独特の風味。"}
+];
+
+/* ── STATE ── */
+let sel=null, cont='all', extra=null;
+
+/* ── STORAGE ── */
+const getFav=id=>localStorage.getItem('cf_'+id)==='1';
+const setFav=(id,v)=>localStorage.setItem('cf_'+id,v?'1':'0');
+const getRat=id=>parseInt(localStorage.getItem('cr_'+id)||'0');
+const setRat=(id,v)=>localStorage.setItem('cr_'+id,v);
+const getMemo=id=>localStorage.getItem('cm_'+id)||'';
+const setMemo=(id,v)=>localStorage.setItem('cm_'+id,v);
+
+/* ── RADAR ── */
+function radar(p){
+  const vals=[p.ar,p.a,p.s,p.b,p.bi];
+  const labels=['香り','酸味','甘み','コク','苦味'];
+  const n=5,cx=110,cy=110,r=75;
+  const ang=i=>(i*72-90)*Math.PI/180;
+  const grids=[.25,.5,.75,1].map(sc=>{
+    const pts=Array.from({length:n},(_,i)=>`${cx+r*sc*Math.cos(ang(i))},${cy+r*sc*Math.sin(ang(i))}`).join(' ');
+    return`<polygon points="${pts}" fill="${sc===1?'none':'rgba(200,190,180,.3)'}" stroke="#d8d0c6" stroke-width="1"/>`;
+  }).join('');
+  const axes=Array.from({length:n},(_,i)=>
+    `<line x1="${cx}" y1="${cy}" x2="${cx+r*Math.cos(ang(i))}" y2="${cy+r*Math.sin(ang(i))}" stroke="#d8d0c6" stroke-width="1"/>`
+  ).join('');
+  const dpts=vals.map((v,i)=>`${cx+r*(v/10)*Math.cos(ang(i))},${cy+r*(v/10)*Math.sin(ang(i))}`).join(' ');
+  const lbls=labels.map((l,i)=>{
+    const lx=cx+(r+20)*Math.cos(ang(i)),ly=cy+(r+20)*Math.sin(ang(i));
+    return`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" fill="#8a7868" font-size="10" font-family="sans-serif">${l}</text>`;
+  }).join('');
+  const dots=vals.map((v,i)=>`<circle cx="${cx+r*(v/10)*Math.cos(ang(i))}" cy="${cy+r*(v/10)*Math.sin(ang(i))}" r="3.5" fill="#7c5030"/>`).join('');
+  return`<svg viewBox="0 0 220 220" width="185" height="185">
+    ${grids}${axes}
+    <polygon points="${dpts}" fill="rgba(124,80,48,.15)" stroke="#7c5030" stroke-width="2" stroke-linejoin="round"/>
+    ${dots}${lbls}
+  </svg>`;
+}
+
+/* ── STATS ── */
+function updateStats(){
+  const fav=origins.filter(o=>getFav(o.id)).length;
+  const memo=origins.filter(o=>getMemo(o.id).trim()).length;
+  const rated=origins.filter(o=>getRat(o.id)>0).length;
+  document.getElementById('hdStats').innerHTML=`
+    <span>🗺 産地 <strong>${origins.length}</strong></span>
+    <span>❤️ お気に入り <strong>${fav}</strong></span>
+    <span>📝 メモ済み <strong>${memo}</strong></span>
+    <span>⭐ 評価済み <strong>${rated}</strong></span>
+  `;
+}
+
+/* ── FILTER ── */
+const contIds=['all','africa','asia','south','central'];
+function setCont(c){
+  cont=c;
+  contIds.forEach(k=>document.getElementById('f-'+k).classList.toggle('on',k===c));
+  applyFilters();
+}
+function toggleExtra(x){
+  extra=extra===x?null:x;
+  ['fav','note','rated'].forEach(k=>document.getElementById('x-'+k).classList.toggle('on',k===x&&extra===x));
+  applyFilters();
+}
+function applyFilters(){
+  const q=(document.getElementById('q').value||'').toLowerCase();
+  const sort=document.getElementById('sortSel').value;
+  let list=origins.filter(o=>{
+    if(cont!=='all'&&o.cont!==cont)return false;
+    if(extra==='fav'&&!getFav(o.id))return false;
+    if(extra==='note'&&!getMemo(o.id).trim())return false;
+    if(extra==='rated'&&!getRat(o.id))return false;
+    if(!q)return true;
+    return o.name.includes(q)||o.en.toLowerCase().includes(q)||
+           o.region.toLowerCase().includes(q)||
+           o.flavors.some(f=>f.includes(q))||o.varieties.toLowerCase().includes(q);
+  });
+  if(sort==='name') list.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(sort==='rate-d') list.sort((a,b)=>getRat(b.id)-getRat(a.id));
+  else if(sort==='acid-d') list.sort((a,b)=>b.p.a-a.p.a);
+  else if(sort==='body-d') list.sort((a,b)=>b.p.b-a.p.b);
+  else if(sort==='alt-d') list.sort((a,b)=>b.alt-a.alt);
+  renderList(list);
+}
+
+/* ── LIST ── */
+const strs=n=>Array.from({length:5},(_,i)=>i<n?'★':'☆').join('');
+function renderList(list){
+  document.getElementById('lc').textContent=`${list.length} 件`;
+  document.getElementById('ls').innerHTML=list.map(o=>{
+    const fav=getFav(o.id),rat=getRat(o.id),memo=getMemo(o.id).trim();
+    return`<div class="card${sel===o.id?' active':''}" onclick="selectOrigin('${o.id}')">
+      <div class="card-row1">
+        <span class="card-flag">${o.flag}</span>
+        <span class="card-name">${o.name}</span>
+        <button class="card-fav${fav?' on':''}" onclick="toggleFavCard(event,'${o.id}')">❤️</button>
+      </div>
+      <div class="card-region">${o.en}</div>
+      <div class="card-stars${rat?' rated':''}">${strs(rat)}</div>
+      <div class="card-tags">
+        ${o.flavors.slice(0,2).map(f=>`<span class="ctag">${f}</span>`).join('')}
+        ${memo?'<span class="ctag note">📝</span>':''}
+        ${fav?'<span class="ctag fav">❤️</span>':''}
+      </div>
+    </div>`;
+  }).join('');
+  updateStats();
+}
+
+/* ── CARD FAV ── */
+function toggleFavCard(e,id){
+  e.stopPropagation();
+  setFav(id,!getFav(id));
+  applyFilters();
+  if(sel===id){const b=document.getElementById('favBtn');if(b)b.classList.toggle('on',getFav(id));}
+}
+
+/* ── DETAIL ── */
+const contLabel={africa:'🌍 アフリカ',asia:'🌏 アジア・太平洋',south:'🌎 南米',central:'🌎 中米・カリブ'};
+function selectOrigin(id){
+  sel=id;applyFilters();
+  const o=origins.find(x=>x.id===id);
+  const fav=getFav(id),memo=getMemo(id);
+  if(window.innerWidth<=640){
+    document.querySelector('.main').classList.add('mob-detail');
+  }
+  document.getElementById('dp').innerHTML=`<div class="dc">
+    <button class="mob-back" onclick="mobBack()">← リストへ戻る</button>
+    <div class="dh">
+      <div class="dh-left">
+        <div class="dh-flag">${o.flag}</div>
+        <div class="dh-name">${o.name}</div>
+        <div class="dh-en">${o.en}</div>
+        <div class="cont-badge">${contLabel[o.cont]}</div>
+        <div class="dh-region">📍 ${o.region}</div>
+        <div class="dh-flavors">${o.flavors.map(f=>`<span class="ftag">${f}</span>`).join('')}</div>
+      </div>
+      <div class="dh-right">
+        <button class="fav-lg${fav?' on':''}" id="favBtn" onclick="toggleFavDetail('${id}')">❤️</button>
+        <div>
+          <div class="my-rate-label">MY RATING</div>
+          <div class="stars-in" id="starsIn"></div>
+          <div class="comm-wrap">
+            <div class="comm-label">みんなの評価</div>
+            <div class="comm-val" id="commVal">―</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-title">説明</div>
+      <p class="desc-text">${o.desc}</p>
+    </div>
+    <div class="sec">
+      <div class="sec-title">風味プロファイル・基本情報</div>
+      <div class="profile-wrap">
+        <div class="radar-wrap">${radar(o.p)}</div>
+        <div class="info-grid">
+          <div class="ig"><div class="ig-label">標高</div><div class="ig-value">🏔 ${o.altStr}</div></div>
+          <div class="ig"><div class="ig-label">精製方法</div><div class="ig-value">⚙️ ${o.process}</div></div>
+          <div class="ig"><div class="ig-label">収穫時期</div><div class="ig-value">📅 ${o.harvest}</div></div>
+          <div class="ig"><div class="ig-label">生産量</div><div class="ig-value">📦 ${o.prod}</div></div>
+          <div class="ig full"><div class="ig-label">主要品種</div><div class="ig-value">🌱 ${o.varieties}</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-title">抽出ガイド</div>
+      <div class="brew-tags">${o.brew.map(b=>`<span class="brew-tag">☕ ${b}</span>`).join('')}</div>
+      <p class="tips-text">💡 ${o.tips}</p>
+    </div>
+    <div class="sec">
+      <div class="sec-title">補足情報</div>
+      <button class="trivia-toggle" onclick="toggleTrivia()">
+        <span class="tarrow" id="tarrow">▶</span>豆知識・歴史・トリビア
+      </button>
+      <div class="tbody" id="tbody">
+        <div class="tbody-inner"><p>${o.trivia}</p></div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-title">📝 マイメモ</div>
+      <textarea class="memo-ta" id="memoTa" placeholder="飲んだ感想・気づいた特徴・購入したお店・抽出条件など自由に..." oninput="updateChars()">${memo}</textarea>
+      <div class="memo-footer">
+        <button class="save-btn" onclick="saveMemo('${id}')">保存する</button>
+        <span class="save-ok" id="saveOk">✓ 保存しました</span>
+        <span class="char-cnt" id="chars">${memo.length} 文字</span>
+      </div>
+    </div>
+  </div>`;
+  renderStars(id);
+  _loadCommRat(id,function(avg,cnt){
+    const el=document.getElementById('commVal');
+    if(!el)return;
+    el.innerHTML=cnt?`★${avg.toFixed(1)}<small>(${cnt}人)</small>`:'まだ評価なし';
+  });
+}
+
+function mobBack(){
+  document.querySelector('.main').classList.remove('mob-detail');
+  document.getElementById('dp').innerHTML='<div class="placeholder"><div class="ph-icon">☕</div><div class="ph-text">産地を選んでください</div><div class="ph-sub">上リストから気になる産地をタップ</div></div>';
+  sel=null;applyFilters();
+}
+function toggleFavDetail(id){
+  setFav(id,!getFav(id));
+  document.getElementById('favBtn').classList.toggle('on',getFav(id));
+  applyFilters();
+}
+function toggleTrivia(){
+  document.getElementById('tbody').classList.toggle('open');
+  document.getElementById('tarrow').classList.toggle('open');
+}
+function renderStars(id){
+  const rat=getRat(id),el=document.getElementById('starsIn');
+  if(!el)return;
+  el.innerHTML=Array.from({length:5},(_,i)=>
+    `<button class="star-btn${i<rat?' lit':''}"
+      onmouseover="hoverStars(${i+1})"
+      onmouseout="renderStars('${id}')"
+      onclick="setRatDetail('${id}',${i+1})">★</button>`
+  ).join('');
+}
+function hoverStars(n){document.querySelectorAll('.star-btn').forEach((b,i)=>b.classList.toggle('lit',i<n))}
+function setRatDetail(id,v){
+  setRat(id,getRat(id)===v?0:v);
+  _syncRat(id,getRat(id));
+  renderStars(id);
+  applyFilters();
+  _loadCommRat(id,function(avg,cnt){
+    const el=document.getElementById('commVal');
+    if(el)el.innerHTML=cnt?`★${avg.toFixed(1)}<small>(${cnt}人)</small>`:'まだ評価なし';
+  });
+}
+function updateChars(){const t=document.getElementById('memoTa'),e=document.getElementById('chars');if(t&&e)e.textContent=t.value.length+' 文字';}
+function saveMemo(id){
+  const t=document.getElementById('memoTa');if(!t)return;
+  setMemo(id,t.value);
+  const ok=document.getElementById('saveOk');ok.classList.add('show');
+  setTimeout(()=>ok.classList.remove('show'),2000);
+  applyFilters();
+}
+
+document.getElementById('q').addEventListener('input',applyFilters);
+applyFilters();
+
+/* ── HAMBURGER POPUP ── */
+function toggleHbMenu(){
+  document.getElementById('hbPopup').classList.toggle('open');
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.hd-menu-btn')&&!e.target.closest('#hbPopup')){
+    document.getElementById('hbPopup').classList.remove('open');
+  }
+});
+
+/* ── FULL-SCREEN ── */
+function openFS(page){
+  document.getElementById('hbPopup').classList.remove('open');
+  switchFS(page);
+  document.getElementById('fsOv').classList.add('open');
+}
+function closeFS(){document.getElementById('fsOv').classList.remove('open')}
+function switchFS(page){
+  document.querySelectorAll('.fs-tab').forEach(t=>t.classList.toggle('on',t.dataset.p===page));
+  document.querySelectorAll('.fs-page').forEach(p=>p.classList.toggle('on',p.id==='fp-'+page));
+}
+function switchMapTab(btn,id){
+  document.querySelectorAll('.map-stab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.map-stab-content').forEach(d=>d.style.display='none');
+  var t=document.getElementById('mstab-'+id);
+  if(t)t.style.display='block';
+  var colors={africa:'#E74C3C',asia:'#2980B9',south:'#27AE60',central:'#E67E22'};
+  ['africa','asia','south','central'].forEach(function(r){
+    var g=document.getElementById('mapG-'+r);
+    if(!g)return;
+    var on=r===id;
+    g.setAttribute('opacity',on?'1':'0.18');
+    g.setAttribute('fill',colors[r]);
+    g.setAttribute('filter',on?'url(#dotShadow)':'none');
+    g.setAttribute('stroke',on?'rgba(255,255,255,.7)':'none');
+    g.setAttribute('stroke-width',on?'0.8':'0');
+    g.querySelectorAll('circle').forEach(function(c){c.setAttribute('r',on?'5':'2.5');});
+  });
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFS();});
+
+/* ── SPECIES TAB ── */
+function switchSP(sp){
+  document.querySelectorAll('.sp-tab').forEach(t=>t.classList.toggle('on',t.dataset.sp===sp));
+  document.querySelectorAll('.sp-content').forEach(c=>c.classList.toggle('on',c.id==='sp-'+sp));
+}
+
+/* ── VARIETY TOOLTIP ── */
+const vtTip=document.getElementById('vtTip');
+document.addEventListener('mouseover',e=>{
+  const el=e.target.closest('.vv[data-tip]');
+  if(!el)return;
+  vtTip.innerHTML=el.dataset.tip.split('\n').join('<br>');
+  vtTip.classList.add('show');
+});
+document.addEventListener('mousemove',e=>{
+  if(!vtTip.classList.contains('show'))return;
+  const W=window.innerWidth,H=window.innerHeight;
+  const tw=vtTip.offsetWidth||260,th=vtTip.offsetHeight||100;
+  let x=e.clientX+16,y=e.clientY-8;
+  if(x+tw>W-12)x=e.clientX-tw-16;
+  if(y+th>H-12)y=H-th-12;
+  if(y<8)y=8;
+  vtTip.style.left=x+'px';vtTip.style.top=y+'px';
+});
+document.addEventListener('mouseout',e=>{
+  if(e.target.closest('.vv[data-tip]')&&!e.relatedTarget?.closest('.vv[data-tip]')){
+    vtTip.classList.remove('show');
+  }
+});
+
+/* ── MAP TOOLTIP ── */
+var mapFloatTip=(function(){
+  var el=document.createElement('div');
+  el.id='mapFloatTip';
+  el.style.cssText='display:none;position:fixed;background:#2C1A0E;color:#f0e8d8;padding:5px 12px;border-radius:6px;font-size:12px;font-family:sans-serif;pointer-events:none;z-index:9999;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.4)';
+  document.body.appendChild(el);
+  return el;
+})();
+(function(){
+  function showTip(e,cn){
+    mapFloatTip.textContent=cn;
+    mapFloatTip.style.display='block';
+    mapFloatTip.style.left=(e.clientX+14)+'px';
+    mapFloatTip.style.top=(e.clientY-10)+'px';
+  }
+  document.querySelectorAll('#mapMainSvg circle[data-cn]').forEach(function(c){
+    c.style.cursor='pointer';
+    c.addEventListener('mouseenter',function(e){showTip(e,c.getAttribute('data-cn'));});
+    c.addEventListener('mousemove', function(e){showTip(e,c.getAttribute('data-cn'));});
+    c.addEventListener('mouseleave',function(){mapFloatTip.style.display='none';});
+    c.addEventListener('click',function(){
+      var cn=c.getAttribute('data-cn');
+      var o=origins.find(function(x){return x.name===cn||x.name.startsWith(cn.slice(0,4));});
+      if(o){closeFS();selectOrigin(o.id);}
+    });
+  });
+})();
+</script>
+</body>
+</html>
