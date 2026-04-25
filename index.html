@@ -1924,6 +1924,24 @@ function selectOrigin(id){
     if(!el)return;
     el.innerHTML=cnt?`★${avg.toFixed(1)}<small>(${cnt}人)</small>`:'まだ評価なし';
   });
+  updateAdCountry(o);
+}
+
+function updateAdCountry(o){
+  const el=document.getElementById('adCountry');
+  if(!el)return;
+  const q=encodeURIComponent(o.name+' コーヒー豆');
+  const url='https://search.rakuten.co.jp/search/mall/'+q+'/';
+  const affUrl='https://hb.afl.rakuten.co.jp/ichiba/53285694.676408f1.53285695.43823352/?pc='+encodeURIComponent(url)+'&link_type=text';
+  el.innerHTML=`
+    <div class="ad-country-label">おすすめの豆</div>
+    <div style="margin-top:8px;font-size:13px;color:var(--text);font-family:sans-serif;">
+      ${o.flag} ${o.name}のコーヒー豆
+    </div>
+    <a href="${affUrl}" target="_blank" rel="nofollow sponsored noopener"
+       style="display:block;margin-top:10px;padding:8px 12px;background:var(--brown);color:#f0e8d8;border-radius:6px;font-size:12px;font-family:sans-serif;text-decoration:none;text-align:center;">
+      楽天で探す →
+    </a>`;
 }
 
 function mobBack(){
