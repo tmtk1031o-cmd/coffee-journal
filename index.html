@@ -90,6 +90,20 @@ header{
 /* ── LAYOUT ── */
 .main{display:flex;height:calc(100vh - 104px)}
 
+/* ── RIGHT AD PANEL ── */
+.ad-panel{
+  width:260px;min-width:260px;
+  background:var(--panel);
+  border-left:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow:hidden;flex-shrink:0;
+}
+.ad-country{flex:1;overflow-y:auto;padding:12px 10px;border-bottom:1px solid var(--border)}
+.ad-country-label{font-size:9px;color:var(--t3);letter-spacing:1px;font-family:sans-serif;margin-bottom:8px;text-transform:uppercase}
+.ad-fixed{padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.ad-fixed-label{font-size:9px;color:var(--t3);letter-spacing:1px;font-family:sans-serif;text-transform:uppercase;align-self:flex-start}
+.ad-fixed img{border-radius:4px;max-width:100%}
+
 /* ── LIST PANEL ── */
 .list-panel{
   width:268px;min-width:268px;
@@ -428,6 +442,7 @@ header{
   .sw input{width:140px}
   .main{flex-direction:column;height:auto;min-height:calc(100vh - 90px)}
   .list-panel{width:100%;min-width:0;height:42vh;max-height:42vh;border-right:none;border-bottom:1px solid var(--border)}
+  .ad-panel{display:none}
   .detail-panel{min-height:58vh}
   .main.mob-detail .list-panel{display:none}
   .main.mob-detail .detail-panel{height:calc(100vh - 90px);min-height:unset}
@@ -509,6 +524,15 @@ header{
       <div class="ph-sub">左リストから気になる産地をクリック</div>
     </div>
   </main>
+  <aside class="ad-panel">
+    <div class="ad-country" id="adCountry">
+      <div class="ad-country-label">おすすめの豆</div>
+    </div>
+    <div class="ad-fixed">
+      <div class="ad-fixed-label">ピックアップ</div>
+      <a href="https://hb.afl.rakuten.co.jp/ichiba/53285694.676408f1.53285695.43823352/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fyaguchigroup%2Fkawu-002%2F&link_type=pict&ut=eyJwYWdlIjoiaXRlbSIsInR5cGUiOiJwaWN0Iiwic2l6ZSI6IjI0MHgyNDAiLCJuYW0iOjEsIm5hbXAiOiJyaWdodCIsImNvbSI6MSwiY29tcCI6ImRvd24iLCJwcmljZSI6MSwiYm9yIjoxLCJjb2wiOjEsImJidG4iOjEsInByb2QiOjAsImFtcCI6ZmFsc2V9" target="_blank" rel="nofollow sponsored noopener" style="word-wrap:break-word;"><img src="https://hbb.afl.rakuten.co.jp/hgb/53285694.676408f1.53285695.43823352/?me_id=1439473&item_id=10000042&pc=https%3A%2F%2Fimage.rakuten.co.jp%2Fyaguchigroup%2Fcabinet%2F13087725%2F2.jpg%3F_ex%3D240x240&s=240x240&t=pict" border="0" style="margin:2px" alt="コーヒーミル" title="コーヒーミル"></a>
+    </div>
+  </aside>
 </div>
 
 <!-- ── TOOLTIP ── -->
