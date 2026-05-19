@@ -10,6 +10,11 @@
 <meta property="og:description" content="「あの豆、なんだったっけ？」を解決。世界のコーヒー産地・フレーバー・人気の豆を探して、飲んだ感想をメモできるウェブサイト。気に入った豆は楽天市場でそのまま購入できます。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tmtk1031o-cmd.github.io/coffee-journal/">
+<meta property="og:image" content="https://tmtk1031o-cmd.github.io/coffee-journal/wmap.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="800">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://tmtk1031o-cmd.github.io/coffee-journal/wmap.jpg">
 <link rel="canonical" href="https://tmtk1031o-cmd.github.io/coffee-journal/">
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-05Z823CY3Q"></script>
@@ -18,6 +23,9 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-05Z823CY3Q');
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"コーヒージャーナル","url":"https://tmtk1031o-cmd.github.io/coffee-journal/","description":"世界のコーヒー産地・フレーバー・人気の豆を探して、飲んだ感想をメモできるウェブサイト。気に入った豆は楽天市場でそのまま購入できます。","potentialAction":{"@type":"SearchAction","target":"https://tmtk1031o-cmd.github.io/coffee-journal/?q={search_term_string}","query-input":"required name=search_term_string"}}
 </script>
 <style>
 :root {
@@ -41,7 +49,7 @@
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Georgia',serif;background:var(--bg);color:var(--text);min-height:100vh;overflow:hidden}
+body{font-family:'Georgia',serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
 
 /* ── HEADER ── */
 header{
@@ -95,8 +103,15 @@ header{
   color:var(--t3);font-size:11px;cursor:pointer;font-family:sans-serif;outline:none;flex-shrink:0;
 }
 
+/* ── TOOLBAR2 ── */
+.toolbar2{height:36px;background:var(--s3);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:5px;padding:0 14px;flex-shrink:0;overflow-x:auto}
+.toolbar2::-webkit-scrollbar{display:none}
+.fl-label{font-size:10px;color:var(--t4);font-family:sans-serif;white-space:nowrap;flex-shrink:0;letter-spacing:.5px}
+.fl-btn{height:24px;padding:0 10px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--t3);font-size:11px;cursor:pointer;font-family:sans-serif;white-space:nowrap;flex-shrink:0;transition:all .15s}
+.fl-btn:hover{background:var(--off2);color:var(--t2)}
+.fl-btn.on{background:var(--br2);color:#f0e8d8;border-color:var(--br2)}
 /* ── LAYOUT ── */
-.main{display:flex;height:calc(100vh - 104px)}
+.main{display:flex;flex:1;min-height:0}
 
 /* ── RIGHT AD PANEL ── */
 .ad-panel{
@@ -448,12 +463,14 @@ header{
   .hd-title{font-size:15px}
   .toolbar{padding:0 10px;gap:4px}
   .sw input{width:140px}
-  .main{flex-direction:column;height:auto;min-height:calc(100vh - 90px)}
+  .toolbar2{padding:0 10px;gap:3px}
+  .fl-label{display:none}
+  .main{flex-direction:column;height:auto;flex:1;min-height:0}
   .list-panel{width:100%;min-width:0;height:42vh;max-height:42vh;border-right:none;border-bottom:1px solid var(--border)}
   .ad-panel{display:none}
   .detail-panel{min-height:58vh}
   .main.mob-detail .list-panel{display:none}
-  .main.mob-detail .detail-panel{height:calc(100vh - 90px);min-height:unset}
+  .main.mob-detail .detail-panel{flex:1;height:auto;min-height:unset}
   .mob-back{display:flex}
   .dc{padding:12px 14px 40px}
   .dh{flex-direction:column;gap:10px}
@@ -517,6 +534,29 @@ header{
     <option value="acid-d">酸味が強い順</option>
     <option value="body-d">コクが強い順</option>
     <option value="alt-d">標高が高い順</option>
+  </select>
+</div>
+
+<div class="toolbar2">
+  <span class="fl-label">フレーバー:</span>
+  <button class="fl-btn" data-fl="berry"   onclick="setFlavorFilter('berry')">🫐 ベリー</button>
+  <button class="fl-btn" data-fl="citrus"  onclick="setFlavorFilter('citrus')">🍋 シトラス</button>
+  <button class="fl-btn" data-fl="floral"  onclick="setFlavorFilter('floral')">🌸 フローラル</button>
+  <button class="fl-btn" data-fl="choco"   onclick="setFlavorFilter('choco')">🍫 チョコ</button>
+  <button class="fl-btn" data-fl="nuts"    onclick="setFlavorFilter('nuts')">🥜 ナッツ</button>
+  <button class="fl-btn" data-fl="caramel" onclick="setFlavorFilter('caramel')">🍯 甘み系</button>
+  <button class="fl-btn" data-fl="wine"    onclick="setFlavorFilter('wine')">🍷 ワイン</button>
+  <button class="fl-btn" data-fl="earth"   onclick="setFlavorFilter('earth')">🌿 アース</button>
+  <button class="fl-btn" data-fl="spice"   onclick="setFlavorFilter('spice')">🌶 スパイス</button>
+  <div class="sep"></div>
+  <span class="fl-label">精製法:</span>
+  <select class="sort-sel" id="procSel" onchange="applyFilters()">
+    <option value="">すべて</option>
+    <option value="ウォッシュド">ウォッシュド</option>
+    <option value="ナチュラル">ナチュラル</option>
+    <option value="ハニー">ハニー</option>
+    <option value="アナエロビック">アナエロビック</option>
+    <option value="スマトラ">スマトラ式</option>
   </select>
 </div>
 
@@ -1738,8 +1778,20 @@ const origins=[
  tips:"活火山の土壌で育つ世界でも珍しいコーヒー。ミネラル感のある独特の風味。"}
 ];
 
+/* ── FLAVOR FILTERS ── */
+const FLAVOR_FILTERS=[
+  {id:'berry',  terms:['ベリー','カラント']},
+  {id:'citrus', terms:['シトラス','グレープフルーツ','オレンジ','レモン']},
+  {id:'floral', terms:['フローラル','ジャスミン','ローズ','フラワー']},
+  {id:'choco',  terms:['チョコ']},
+  {id:'nuts',   terms:['ナッツ']},
+  {id:'caramel',terms:['キャラメル','ハニー','キャンディ','スウィート']},
+  {id:'wine',   terms:['ワイン']},
+  {id:'earth',  terms:['アース']},
+  {id:'spice',  terms:['スパイス']},
+];
 /* ── STATE ── */
-let sel=null, cont='all', extra=null;
+let sel=null, cont='all', extra=null, flavorFilter=null;
 
 /* ── STORAGE ── */
 const getFav=id=>localStorage.getItem('cf_'+id)==='1';
@@ -1800,18 +1852,30 @@ function toggleExtra(x){
   ['fav','note','rated'].forEach(k=>document.getElementById('x-'+k).classList.toggle('on',k===x&&extra===x));
   applyFilters();
 }
+function setFlavorFilter(id){
+  flavorFilter=flavorFilter===id?null:id;
+  document.querySelectorAll('.fl-btn').forEach(b=>b.classList.toggle('on',b.dataset.fl===flavorFilter));
+  applyFilters();
+}
 function applyFilters(){
   const q=(document.getElementById('q').value||'').toLowerCase();
   const sort=document.getElementById('sortSel').value;
+  const proc=(document.getElementById('procSel')||{}).value||'';
   let list=origins.filter(o=>{
     if(cont!=='all'&&o.cont!==cont)return false;
     if(extra==='fav'&&!getFav(o.id))return false;
     if(extra==='note'&&!getMemo(o.id).trim())return false;
     if(extra==='rated'&&!getRat(o.id))return false;
+    if(proc&&!o.process.includes(proc))return false;
+    if(flavorFilter){
+      const ff=FLAVOR_FILTERS.find(f=>f.id===flavorFilter);
+      if(ff&&!ff.terms.some(t=>o.flavors.some(f=>f.includes(t))))return false;
+    }
     if(!q)return true;
     return o.name.includes(q)||o.en.toLowerCase().includes(q)||
            o.region.toLowerCase().includes(q)||
-           o.flavors.some(f=>f.includes(q))||o.varieties.toLowerCase().includes(q);
+           o.flavors.some(f=>f.includes(q))||o.varieties.toLowerCase().includes(q)||
+           o.process.toLowerCase().includes(q);
   });
   if(sort==='name') list.sort((a,b)=>a.name.localeCompare(b.name));
   else if(sort==='rate-d') list.sort((a,b)=>getRat(b.id)-getRat(a.id));
@@ -1918,7 +1982,7 @@ function selectOrigin(id){
     </div>
     <div class="sec">
       <div class="sec-title">📝 マイメモ</div>
-      <textarea class="memo-ta" id="memoTa" placeholder="飲んだ感想・気づいた特徴・購入したお店・抽出条件など自由に..." oninput="updateChars()">${memo}</textarea>
+      <textarea class="memo-ta" id="memoTa" placeholder="飲んだ感想・気づいた特徴・購入したお店・抽出条件など自由に..." autocomplete="off" spellcheck="false">${memo}</textarea>
       <div class="memo-footer">
         <button class="save-btn" onclick="saveMemo('${id}')">保存する</button>
         <span class="save-ok" id="saveOk">✓ 保存しました</span>
@@ -1926,6 +1990,8 @@ function selectOrigin(id){
       </div>
     </div>
   </div>`;
+  const _ta=document.getElementById('memoTa');
+  ['input','compositionend','compositionupdate','change','keyup','paste'].forEach(ev=>_ta.addEventListener(ev,updateChars));
   renderStars(id);
   _loadCommRat(id,function(avg,cnt){
     const el=document.getElementById('commVal');
@@ -1938,17 +2004,27 @@ function selectOrigin(id){
 function updateAdCountry(o){
   const el=document.getElementById('adCountry');
   if(!el)return;
-  const q=encodeURIComponent(o.name+' コーヒー豆');
-  const url='https://search.rakuten.co.jp/search/mall/'+q+'/';
-  const affUrl='https://hb.afl.rakuten.co.jp/ichiba/53285694.676408f1.53285695.43823352/?pc='+encodeURIComponent(url)+'&link_type=text';
+  const qSpec=encodeURIComponent(o.name+' コーヒー豆 スペシャルティ');
+  const qGen=encodeURIComponent(o.name+' コーヒー');
+  const affBase='https://hb.afl.rakuten.co.jp/ichiba/53285694.676408f1.53285695.43823352/?pc=';
+  const urlSpec='https://search.rakuten.co.jp/search/mall/'+qSpec+'/';
+  const urlGen='https://search.rakuten.co.jp/search/mall/'+qGen+'/';
+  const affSpec=affBase+encodeURIComponent(urlSpec)+'&link_type=text';
+  const affGen=affBase+encodeURIComponent(urlGen)+'&link_type=text';
+  const flavorStr=o.flavors.slice(0,3).join(' · ');
   el.innerHTML=`
     <div class="ad-country-label">おすすめの豆</div>
-    <div style="margin-top:8px;font-size:13px;color:var(--text);font-family:sans-serif;">
-      ${o.flag} ${o.name}のコーヒー豆
+    <div style="margin-top:8px;font-size:14px;color:var(--text);font-family:sans-serif;font-weight:bold;">
+      ${o.flag} ${o.name}
     </div>
-    <a href="${affUrl}" target="_blank" rel="nofollow sponsored noopener"
-       style="display:block;margin-top:10px;padding:8px 12px;background:var(--brown);color:#f0e8d8;border-radius:6px;font-size:12px;font-family:sans-serif;text-decoration:none;text-align:center;">
-      楽天で探す →
+    <div style="font-size:11px;color:var(--t3);font-family:sans-serif;margin-top:3px;line-height:1.6;">${flavorStr}</div>
+    <a href="${affSpec}" target="_blank" rel="nofollow sponsored noopener"
+       style="display:block;margin-top:10px;padding:9px 12px;background:var(--brown);color:#f0e8d8;border-radius:6px;font-size:12px;font-family:sans-serif;text-decoration:none;text-align:center;font-weight:bold;">
+      🛒 スペシャルティ豆を探す
+    </a>
+    <a href="${affGen}" target="_blank" rel="nofollow sponsored noopener"
+       style="display:block;margin-top:6px;padding:7px 12px;background:transparent;color:var(--brown);border:1px solid var(--br3);border-radius:6px;font-size:11px;font-family:sans-serif;text-decoration:none;text-align:center;">
+      ${o.name}コーヒーをすべて見る →
     </a>`;
 }
 
