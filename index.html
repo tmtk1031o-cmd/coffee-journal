@@ -103,6 +103,18 @@ header{
   color:var(--t3);font-size:11px;cursor:pointer;font-family:sans-serif;outline:none;flex-shrink:0;
 }
 
+/* ── SHOP BUTTONS ── */
+.shop-btn{display:flex;align-items:center;gap:8px;margin-bottom:7px;padding:9px 12px;border-radius:7px;font-size:12px;font-family:sans-serif;text-decoration:none;font-weight:bold;transition:opacity .15s}
+.shop-btn:hover{opacity:.85}
+.shop-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;font-size:10px;font-weight:900;flex-shrink:0}
+.rakuten-btn{background:#bf0000;color:#fff}
+.rakuten-btn .shop-icon{background:rgba(255,255,255,.2)}
+.amazon-btn{background:#ff9900;color:#111}
+.amazon-btn .shop-icon{background:rgba(0,0,0,.12)}
+.yahoo-btn{background:#ff0033;color:#fff}
+.yahoo-btn .shop-icon{background:rgba(255,255,255,.2)}
+.google-btn{background:#4285f4;color:#fff}
+.google-btn .shop-icon{background:rgba(255,255,255,.2)}
 /* ── TOOLBAR2 ── */
 .toolbar2{height:36px;background:var(--s3);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:5px;padding:0 14px;flex-shrink:0;overflow-x:auto}
 .toolbar2::-webkit-scrollbar{display:none}
@@ -2004,27 +2016,33 @@ function selectOrigin(id){
 function updateAdCountry(o){
   const el=document.getElementById('adCountry');
   if(!el)return;
-  const qSpec=encodeURIComponent(o.name+' コーヒー豆 スペシャルティ');
-  const qGen=encodeURIComponent(o.name+' コーヒー');
+  const q=o.name+' コーヒー豆';
+  const qSpec=o.name+' コーヒー豆 スペシャルティ';
   const affBase='https://hb.afl.rakuten.co.jp/ichiba/53285694.676408f1.53285695.43823352/?pc=';
-  const urlSpec='https://search.rakuten.co.jp/search/mall/'+qSpec+'/';
-  const urlGen='https://search.rakuten.co.jp/search/mall/'+qGen+'/';
-  const affSpec=affBase+encodeURIComponent(urlSpec)+'&link_type=text';
-  const affGen=affBase+encodeURIComponent(urlGen)+'&link_type=text';
+  const rakutenUrl='https://search.rakuten.co.jp/search/mall/'+encodeURIComponent(qSpec)+'/';
+  const rakutenAff=affBase+encodeURIComponent(rakutenUrl)+'&link_type=text';
+  /* Amazon: アソシエイトID取得後 &tag=YOUR-ID-22 を追記 */
+  const amazonUrl='https://www.amazon.co.jp/s?k='+encodeURIComponent(q);
+  const yahooUrl='https://shopping.yahoo.co.jp/search?p='+encodeURIComponent(q);
+  const googleUrl='https://www.google.com/search?tbm=shop&q='+encodeURIComponent(q);
   const flavorStr=o.flavors.slice(0,3).join(' · ');
   el.innerHTML=`
-    <div class="ad-country-label">おすすめの豆</div>
+    <div class="ad-country-label">この産地の豆を探す</div>
     <div style="margin-top:8px;font-size:14px;color:var(--text);font-family:sans-serif;font-weight:bold;">
       ${o.flag} ${o.name}
     </div>
-    <div style="font-size:11px;color:var(--t3);font-family:sans-serif;margin-top:3px;line-height:1.6;">${flavorStr}</div>
-    <a href="${affSpec}" target="_blank" rel="nofollow sponsored noopener"
-       style="display:block;margin-top:10px;padding:9px 12px;background:var(--brown);color:#f0e8d8;border-radius:6px;font-size:12px;font-family:sans-serif;text-decoration:none;text-align:center;font-weight:bold;">
-      🛒 スペシャルティ豆を探す
+    <div style="font-size:11px;color:var(--t3);font-family:sans-serif;margin-top:3px;margin-bottom:12px;line-height:1.6;">${flavorStr}</div>
+    <a href="${rakutenAff}" target="_blank" rel="nofollow sponsored noopener" class="shop-btn rakuten-btn">
+      <span class="shop-icon">R</span> 楽天市場
     </a>
-    <a href="${affGen}" target="_blank" rel="nofollow sponsored noopener"
-       style="display:block;margin-top:6px;padding:7px 12px;background:transparent;color:var(--brown);border:1px solid var(--br3);border-radius:6px;font-size:11px;font-family:sans-serif;text-decoration:none;text-align:center;">
-      ${o.name}コーヒーをすべて見る →
+    <a href="${amazonUrl}" target="_blank" rel="nofollow noopener" class="shop-btn amazon-btn">
+      <span class="shop-icon">a</span> Amazon
+    </a>
+    <a href="${yahooUrl}" target="_blank" rel="nofollow noopener" class="shop-btn yahoo-btn">
+      <span class="shop-icon">Y!</span> Yahoo!ショッピング
+    </a>
+    <a href="${googleUrl}" target="_blank" rel="nofollow noopener" class="shop-btn google-btn">
+      <span class="shop-icon">G</span> Googleショッピング
     </a>`;
 }
 
